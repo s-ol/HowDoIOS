@@ -23,9 +23,17 @@
 	SET B, 0x8000
 	HWI [lem1802_id]
     
-    SET PC, _editor
+    screen_print_string( _shell_banner, 0x8000, 0x8a00 )
+    screen_print_string( _shell_welcome, 0x8020, 0xf000 )
+    screen_print_string( _shell_prompt, 0x8040, 0xc080 )
+:_shell_loop
+    SET PC, _shell_loop
     
-    
+
+:_shell_banner dat "S0lllOS 1.0", 0
+:_shell_welcome	dat "Welcome back!", 0
+:_shell_prompt	dat ">", 0
+
 ; hardware enumeration
 :setup_keyboard
             SET [keyboard_id], I   ; I holds the hardware ID, alternatively check hwenum_targets + 3

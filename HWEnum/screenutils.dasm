@@ -1,0 +1,33 @@
+; --------------------------------------------
+; Title:   screenutils
+; Author:  S0lll0s
+; Date:    18.04.2013
+; Version: 1.0
+; --------------------------------------------
+
+:_screen_print_string
+	SET PUSH, Y
+	;SET C, 0xf000 ; fi
+:_screen_print_string_loop
+	IFE [J], 0
+		SET PC, _screen_print_string_done
+	SET Y, B
+	BOR Y, [J]
+	STI [I], Y
+	SET PC, _screen_print_string_loop
+:_screen_print_string_done
+	SET Y, POP
+	SET PC, POP
+	
+#macro screen_print_string( string, cursor, color ) {
+	SET PUSH, I
+	SET PUSH, J
+	SET PUSH, B
+	SET I, cursor
+	SET J, string
+	SET B, color
+	JSR _screen_print_string
+	SET B, POP
+	SET J, POP
+	SET I, POP
+}
