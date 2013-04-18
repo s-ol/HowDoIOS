@@ -1,0 +1,35 @@
+; --------------------------------------------
+; Title:   editor
+; Author:  S0lll0s
+; Date:    18.04.2013
+; Version: 1.0
+; --------------------------------------------
+
+:_editor
+	IAS _editor_interrupt
+	JSR kern_hijack_interrupt
+	SET X, 0
+	
+:_editor_loop
+	SET PC, _editor_loop
+
+:_editor_interrupt
+	IFN A, 2
+		RFI 0
+	
+	SET A, 1
+	HWI [keyboard_id] ; get last typed key into C
+	IFE C, 0
+		RFI 0
+	
+	IFL C, 0x20
+		RFI 0
+	IFG C, 0x80
+		RFI 0
+		
+	SET Y, X
+	ADD Y, 0x8000
+	BOR C, 0xf000
+	SET [ Y ], C
+	ADD X, 1
+	RFI 0

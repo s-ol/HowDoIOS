@@ -1,0 +1,37 @@
+; --------------------------------------------
+; Title:   memutils
+; Author:  S0lll0s
+; Date:    18.04.2013
+; Version: 1.0
+; --------------------------------------------
+
+#macro memcpy ( source, dest, length ) {
+	SET PUSH, X
+	SET PUSH, Y
+	SET PUSH, I
+	SET PUSH, J
+	SET I, source
+	SET J, dest
+	SET X, 0
+	SET Y, length
+	SUB Y, 4
+:memcpy_loop
+	IFG X, Y
+		SET PC, memcpy_after
+	STI I, J
+	STI I, J
+	STI I, J
+	STI I, J
+	ADD X, 4
+	SET PC, memcpy_loop
+:memcpy_after
+	IFG X, length
+		SET PC, memcpy_end
+	STI I, J
+	SET PC, memcpy_after
+:memcpy_end
+	SET J, POP
+	SET I, POP
+	SET Y, POP
+	SET X, POP
+}

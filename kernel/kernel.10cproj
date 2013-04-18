@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="1.7.6" type="code">
+  <name>kernel</name>
+  <properties>
+    <property name="code.generateBinaryOutput">true</property>
+    <property name="code.binaryOutputFilename">kernel.bin</property>
+    <property name="code.generateHexOutput">false</property>
+    <property name="code.hexOutputFilename">kernel.hex</property>
+    <property name="code.setFirstFile">True</property>
+    <property name="code.firstFile">shell.dasm</property>
+  </properties>
+  <references>
+    <project>HWEnum</project>
+  </references>
+  <files>
+    <file path="kernel.dasm" />
+    <file path="shell.dasm" />
+    <file path="editor.dasm" />
+    <file path="count.dasm" />
+  </files>
+</project>

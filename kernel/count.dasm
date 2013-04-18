@@ -1,0 +1,22 @@
+; --------------------------------------------
+; Title:   count
+; Author:  S0lll0s
+; Date:    18.04.2013
+; Version: 
+; --------------------------------------------
+
+:_count
+	IAS _editor_interrupts
+	JSR kern_hijack_interrupt
+	SET X, 0
+:_count_loop
+	SET B, 0x2000
+	BOR B, A
+	ADD B, 0x20
+	SET [0x8013], B
+	SET PC, _count_loop
+	
+:_editor_interrupts
+	ADD A, 1
+	MOD A, 0xef
+	RFI 0
