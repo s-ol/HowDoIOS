@@ -62,6 +62,8 @@
 	IFG C, 0x80
 		SET PC, _shell_nonascii
 		
+	IFE X, 30
+		RFI 0
 	SET [_shell_command+X], C
 	ADD X, 1
 	SET Z, X
@@ -79,14 +81,7 @@
 	RFI 0
 	
 :_shell_return
-	SET [Y],  0x403e ; set old prompt to non blinking dark red
-	SET Z, X
-	ADD Z, Y
-	SET [Z+1], 0
 	SET [_shell_command+X], 0
-	ADD Y, 0x20
-	SET [Y], 0xc0be ; new prompt
-	SET X, 0
 	
 	; do something with the command
 	;strcmp( _shell_command, _shell_commands )
@@ -107,9 +102,19 @@
 		SET PC, _shell_cmd_loop_back
 	ADD B, _shell_commands
 	ADD B, 1
-	SET [0x8000], 0xef52
+	SET [Y],  0x203e ; green old prompt
+	SET B, [B]
+	SET PC, [B] ; execute command
+	
+	SET Z, X
+	ADD Z, Y
+	SET [Z+1], 0
+	ADD Y, 0x20
+	SET [Y], 0xc0be   ; new prompt
+	SET [Y+1], 0x8088 ; cursor
+	SET X, 0
+	
 	RFI 0
-	;SET PC, [B]
 	
 :_shell_cmd_loop_back
 	ADD C, B
@@ -125,23 +130,40 @@
 		RFI 0
 	SET Z, X
 	ADD Z, Y
-	SET [Z], 0x8088
-	SET [Z+1], 0
+	SET [Z], 0x8088 ; cursor
+	SET [Z+1], 0    ; clear old cursor
 	SUB X, 1
 	SET [_shell_command+X], 0
 	RFI 0
 
 :fail
-	SET [0x8000], 0xf441
+	SET [Y],  0x403e ; set old prompt to non blinking dark red
+	SET Z, X
+	ADD Z, Y
+	SET [Z+1], 0
+	ADD Y, 0x20
+	SET X, 0
+	
+	;scr_packed_stringf( _shell_cmd_not_found, 0x8020, 0x4000 )
+    SET I, Y
+	SET J, _shell_cmd_not_found
+	SET B, 0x4000
+	JSR _scr_packed_string
+	
+	ADD Y, 0x20
+	SET [Y], 0xc0be   ; new prompt
+	SET [Y+1], 0x8088 ; cursor
 	SET PC, _shell_return_reentry
 
 :test1
 	;memset( 0x8000, 0x80, 0xdb41 )
-	SET X, 0x8000
-	SET Y, 0x80
-	SET Z, 0xdb41
-	JSR _memset
-	SUB PC, 1
+	;SET X, 0x8000
+	;SET Y, 0x80
+	;SET Z, 0xdb41
+	;JSR _memset
+	;SUB PC, 1
+	SET [0x81fa], 0x5133
+	RFI 0
 	
 :test2
 	;memset( 0x8000, 0x80, 0xbd45 )
@@ -149,7 +171,7 @@
 	SET Y, 0x80
 	SET Z, 0xbd45
 	JSR _memset
-	SUB PC, 1
+	RFI 0
 
 
 :_shell_command
@@ -163,6 +185,7 @@
 
 :_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
 :_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
+:_shell_cmd_not_found dat 0x636f, 0x6d6d, 0x616e, 0x6420, 0x6e6f, 0x7420, 0x666f, 0x756e, 0x6400 ; "command not found", 0
 
 ; hardware enumeration
 :setup_keyboard
