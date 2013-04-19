@@ -4,6 +4,11 @@
 ; File:    shell.dasm
 ; *************************
 
+SET PC, _main
+
+:_codecave
+	.reserve 10
+
 :_main
 	; HWENUMERATE( hwenum_targets, 3 ) ; hardware enumerator, results in keyboard_id, clock_id and lem1802_id
 	SET C, hwenum_targets
@@ -31,7 +36,7 @@
     ;scr_packed_stringf( _shell_banner, 0x8000, 0x8a00 )
     SET I, 0x8000
 	SET J, _shell_banner
-	SET B, 0x8a00
+	SET B, 0xa000
 	JSR _scr_packed_string
 	
     ;scr_packed_string( _shell_welcome, 0x8020 )
@@ -95,16 +100,17 @@
 	SET J, _shell_commands
 	ADD J, C
 	IFG J, _shell_commands_end
-		SET PC, fail
+		SET PC, _shell_unknown_cmd
 	JSR _strcmp
 	
 	IFN A, 1
 		SET PC, _shell_cmd_loop_back
-	ADD B, _shell_commands
-	ADD B, 1
+	ADD C, B
+	ADD C, 1
+	SET J, _shell_commands
+	ADD J, C
 	SET [Y],  0x203e ; green old prompt
-	SET B, [B]
-	SET PC, [B] ; execute command
+	JSR [J] ; execute command
 	
 	SET Z, X
 	ADD Z, Y
@@ -136,7 +142,7 @@
 	SET [_shell_command+X], 0
 	RFI 0
 
-:fail
+:_shell_unknown_cmd
 	SET [Y],  0x403e ; set old prompt to non blinking dark red
 	SET Z, X
 	ADD Z, Y
@@ -162,8 +168,8 @@
 	;SET Z, 0xdb41
 	;JSR _memset
 	;SUB PC, 1
-	SET [0x81fa], 0x5133
-	RFI 0
+	SET [0x80fa], 0x5133
+	SET PC, POP
 	
 :test2
 	;memset( 0x8000, 0x80, 0xbd45 )
@@ -171,12 +177,10 @@
 	SET Y, 0x80
 	SET Z, 0xbd45
 	JSR _memset
-	RFI 0
-
+	SET PC, POP
 
 :_shell_command
-	dat 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	; reserve 32
+	.reserve 32
 	
 :_shell_commands
 	dat "test", 0, test1
@@ -185,7 +189,7 @@
 
 :_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
 :_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
-:_shell_cmd_not_found dat 0x636f, 0x6d6d, 0x616e, 0x6420, 0x6e6f, 0x7420, 0x666f, 0x756e, 0x6400 ; "command not found", 0
+:_shell_cmd_not_found dat 0x756e, 0x6b6e, 0x6f77, 0x6e20, 0x636f, 0x6d6d, 0x616e, 0x6400 ; "unknown command", 0
 
 ; hardware enumeration
 :setup_keyboard
@@ -218,3 +222,6 @@
 .include "hwenum.dasm"
 .include "memutils.dasm"
 .include "screenutils.dasm"
+.include "multitask.dasm"
+
+:end

@@ -2,6 +2,8 @@
 ; Project: S0lllOS
 ; Author:  S0lll0s
 ; File: screenutils.dasm
+; *************************
+
 :_scr_string
 	SET PUSH, Y
 	;SET C, 0xf000 ; fi
