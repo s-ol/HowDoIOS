@@ -1,12 +1,15 @@
-; --------------------------------------------
-; Title:   shell
+; *************************
+; Project: S0lllOS
 ; Author:  S0lll0s
-; Date:    18.04.2013
-; Version: 1.0
-; --------------------------------------------
+; File:    shell.dasm
+; *************************
 
 :_main
-	hwenumerate hwenum_targets, 3 ; hardware enumerator, results in keyboard_id, clock_id and lem1802_id
+	; HWENUMERATE( hwenum_targets, 3 ) ; hardware enumerator, results in keyboard_id, clock_id and lem1802_id
+	SET C, hwenum_targets
+ 	SET Y, 3
+	JSR _hwenum
+
 	SET A, 0
     SET B, 1          ; 60 ticks per second
     HWI [clock_id]
@@ -25,8 +28,18 @@
     
     IAS _shell_interrupt
     
-    scr_packed_stringf( _shell_banner, 0x8000, 0x8a00 )
-    scr_packed_string( _shell_welcome, 0x8020 )
+    ;scr_packed_stringf( _shell_banner, 0x8000, 0x8a00 )
+    SET I, 0x8000
+	SET J, _shell_banner
+	SET B, 0x8a00
+	JSR _scr_packed_string
+	
+    ;scr_packed_string( _shell_welcome, 0x8020 )
+    SET I, 0x8020
+	SET J, _shell_welcome
+	SET B, 0xf000
+	JSR _scr_packed_string
+	
     SET [0x8040], 0xc0be
     
     SET X, 0
@@ -76,7 +89,11 @@
 	SET X, 0
 	
 	; do something with the command
-	strcmp( _shell_command, _shell_commands )
+	;strcmp( _shell_command, _shell_commands )
+	SET I, _shell_command
+	SET J, _shell_commands
+	JSR _strcmp
+	
 	IFN A, 1
 		SET PC, _shell_return_reentry
 	ADD B, _shell_commands
@@ -98,15 +115,26 @@
 	SET PC, _shell_it_ret
 	
 :test1
-	memset( 0x8000, 0x80, 0xdb41 )
+	;memset( 0x8000, 0x80, 0xdb41 )
+	SET X, 0x8000
+	SET Y, 0x80
+	SET Z, 0xdb41
+	JSR _memset
 	SUB PC, 1
 	
 :test2
-	memset( 0x8000, 0x80, 0xdb45 )
+	;memset( 0x8000, 0x80, 0xbd45 )
+	SET X, 0x8000
+	SET Y, 0x80
+	SET Z, 0xbd45
+	JSR _memset
 	SUB PC, 1
 
 
-:_shell_command reserve 32
+:_shell_command
+	dat 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	; reserve 32
+	
 :_shell_commands
 	dat "test", 0, test1
 	dat "toast", 0, test2
@@ -142,3 +170,7 @@
 	DAT 0x30cf, 0x7406, 0xffff, setup_keyboard  ; one hardware setup is 4 words long
 	DAT 0x7349, 0xf615, 0xffff, setup_lem1802   ; Format: 4 higher ID bits, 4 lower ID bits, recognized
 	DAT 0x12d0, 0xb402, 0xffff, setup_clock     ; hardware ID (default 0xffff), last address to hwhandler
+	
+.include "hwenum.dasm"
+.include "memutils.dasm"
+.include "screenutils.dasm"

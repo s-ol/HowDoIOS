@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<solution name="S0lllOS" path="C:\Users\S0lll0s\Documents\Coding\0x10c\S0lllOS.10csln" currentFile="">
-  <openFiles>
-    <file path="kernel\kernel.dasm" />
-    <file path="HWEnum\hwenum.dasm" />
-  </openFiles>
-</solution>

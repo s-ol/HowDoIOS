@@ -1,11 +1,9 @@
-; --------------------------------------------
-; Title:   hwenum
+; *************************
+; Project: S0lllOS
 ; Author:  S0lll0s
-; Date:    18.04.2013
-; Version: 1.1
-; --------------------------------------------
-
-:hwenum
+; File: hwenum.dasm
+; *************************
+:_hwenum
              SET PUSH, A
              SET PUSH, B
              SET PUSH, I
@@ -14,48 +12,48 @@
              
              HWN I ; Set I to #connected hardware
              SUB I, 1
-:hwenum_loop
+:_hwenum_loop
              IFE I, 0xffff
-                  SET PC, hwenum_finished
+                  SET PC, _hwenum_finished
                   
              SET PUSH, Y
              SET PUSH, C
              HWQ I
              SET C, POP
              SET Y, POP
-             SET PC, hwenum_handle
-:hwenum_reentry
+             SET PC, _hwenum_handle
+:_hwenum_reentry
              SUB I, 1
-             SET PC, hwenum_loop
-:hwenum_handle
-             SET PUSH, hwenum_reentry
+             SET PC, _hwenum_loop
+:_hwenum_handle
+             SET PUSH, _hwenum_reentry
              SET J, Y
              ADD J, 1
              SET X, C
-:hwenum_lidentify
+:_hwenum_lidentify
              SUB J, 1
              ADD X, 1
              IFE J, 0
                 SET PC, [C] ; Call unknown
              IFN B, [X]
-                 SET PC, hwenum_addthree
+                 SET PC, _hwenum_addthree
              ADD X, 1
              IFN A, [X]
-                  SET PC, hwenum_addtwo
+                  SET PC, _hwenum_addtwo
              ADD X, 1
              IFN [X], 0xffff
-                    SET PC, hwenum_addone
+                    SET PC, _hwenum_addone
              SET [X], I ; Set 3rd Parameter (id)
              ADD X, 1
              SET PC, [X] ; Call setup (4th Parameter)
-:hwenum_addthree
+:_hwenum_addthree
              ADD X, 1
-:hwenum_addtwo
+:_hwenum_addtwo
              ADD X, 1
-:hwenum_addone
+:_hwenum_addone
              ADD X, 1
-             SET PC, hwenum_lidentify
-:hwenum_finished
+             SET PC, _hwenum_lidentify
+:_hwenum_finished
             SET X, POP
             SET J, POP
             SET I, POP
@@ -64,8 +62,10 @@
             SET PC, POP
             
             
-#macro hwenumerate( list,  num ) {
-	SET C, list
-	SET Y, num
-	JSR hwenum
-}
+;.macro HWENUMERATE( LIST,  NUM )
+; {
+;	SET C, LIST
+;	SET Y, NUM
+;	JSR _hwenum
+;.endmacro
+;}
