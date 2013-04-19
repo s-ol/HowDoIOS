@@ -20,19 +20,100 @@
     HWI [keyboard_id]
     
 	SET A, 0
-	SET B, 0x8000
+	SET B, 0x8000     ; map screen to 8000
 	HWI [lem1802_id]
     
-    screen_print_string( _shell_banner, 0x8000, 0x8a00 )
-    screen_print_string( _shell_welcome, 0x8020, 0xf000 )
-    screen_print_string( _shell_prompt, 0x8040, 0xc080 )
+    IAS _shell_interrupt
+    
+    scr_packed_stringf( _shell_banner, 0x8000, 0x8a00 )
+    scr_packed_string( _shell_welcome, 0x8020 )
+    SET [0x8040], 0xc0be
+    
+    SET X, 0
+    SET Y, 0x8040
+    
 :_shell_loop
     SET PC, _shell_loop
-    
 
-:_shell_banner dat "S0lllOS 1.0", 0
-:_shell_welcome	dat "Welcome back!", 0
-:_shell_prompt	dat ">", 0
+:_shell_interrupt
+	IFN A, 2
+		RFI 0
+	
+	SET A, 1
+	HWI [keyboard_id]
+	IFE C, 0
+		RFI 0
+	
+	IFL C, 0x20
+		SET PC, _shell_nonascii
+	IFG C, 0x80
+		SET PC, _shell_nonascii
+		
+	SET [_shell_command+X], C
+	ADD X, 1
+	SET Z, X
+	ADD Z, Y
+	BOR C, 0xf000
+	SET [Z], C
+	SET [Z+1], 0x8088
+	
+:_shell_nonascii
+	IFE C, 0x11
+		SET PC, _shell_return
+	IFE C, 0x10
+		SET PC, _shell_backspace
+:_shell_it_ret
+	RFI 0
+	
+:_shell_return
+	SET [Y],  0x403e ; set old prompt to non blinking dark red
+	SET Z, X
+	ADD Z, Y
+	SET [Z+1], 0
+	SET [_shell_command+X], 0
+	ADD Y, 0x20
+	SET [Y], 0xc0be ; new prompt
+	SET X, 0
+	
+	; do something with the command
+	strcmp( _shell_command, _shell_commands )
+	IFN A, 1
+		SET PC, _shell_return_reentry
+	ADD B, _shell_commands
+	ADD B, 1
+	SET PC, [B]
+:_shell_return_reentry
+	SET [_shell_command], 0
+	SET PC, _shell_it_ret
+	
+:_shell_backspace
+	IFL X, 1
+		SET PC, _shell_it_ret
+	SET Z, X
+	ADD Z, Y
+	SET [Z], 0x8088
+	SET [Z+1], 0
+	SUB X, 1
+	SET [_shell_command+X], 0
+	SET PC, _shell_it_ret
+	
+:test1
+	memset( 0x8000, 0x80, 0xdb41 )
+	SUB PC, 1
+	
+:test2
+	memset( 0x8000, 0x80, 0xdb45 )
+	SUB PC, 1
+
+
+:_shell_command reserve 32
+:_shell_commands
+	dat "test", 0, test1
+	dat "toast", 0, test2
+:_shell_commands_end
+
+:_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
+:_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
 
 ; hardware enumeration
 :setup_keyboard

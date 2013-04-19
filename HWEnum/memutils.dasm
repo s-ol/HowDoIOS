@@ -5,33 +5,109 @@
 ; Version: 1.0
 ; --------------------------------------------
 
-#macro memcpy ( source, dest, length ) {
+:_memcpy
 	SET PUSH, X
-	SET PUSH, Y
-	SET PUSH, I
-	SET PUSH, J
-	SET I, source
-	SET J, dest
+	SET PUSH, Z
 	SET X, 0
-	SET Y, length
+	SET Z, Y
 	SUB Y, 4
-:memcpy_loop
+:_memcpy_loop
 	IFG X, Y
-		SET PC, memcpy_after
+		SET PC, _memcpy_after
 	STI I, J
 	STI I, J
 	STI I, J
 	STI I, J
 	ADD X, 4
-	SET PC, memcpy_loop
-:memcpy_after
-	IFG X, length
-		SET PC, memcpy_end
+	SET PC, _memcpy_loop
+:_memcpy_after
+	IFG X, Z
+		SET PC, _memcpy_end
 	STI I, J
-	SET PC, memcpy_after
-:memcpy_end
+	SET PC, _memcpy_after
+:_memcpy_end
+	SET Z, POP
+	SET X, POP
+	SET PC, POP
+	
+#macro memcpy( source, dest, length ) {
+	SET PUSH, Y
+	SET PUSH, I
+	SET PUSH, J
+	SET I, source
+	SET J, dest
+	SET Y, length
+	SET Z, length
+	JSR _memcpy
 	SET J, POP
 	SET I, POP
 	SET Y, POP
+}
+
+:_memset
+	ADD Y, X
+:_memset_loop
+	IFG X, Y
+		SET PC, _memset_after
+	SET [X],   Z
+	SET [X+1], Z
+	SET [X+2], Z
+	SET [X+3], Z
+	ADD X, 4
+	SET PC, _memset_loop
+:_memset_after
+	IFG X, Y
+		SET PC, _memset_end
+	SET [X], Z
+	ADD X, 1
+	SET PC, _memset_after
+:_memset_end
+	SET Z, POP
 	SET X, POP
+	SET PC, POP
+
+#macro memset( loc, len, val ) {
+	SET PUSH, X
+	SET PUSH, Y
+	SET PUSH, Z
+	SET X, loc
+	SET Y, len
+	SET Z, val
+	JSR _memset
+	SET Z, POP
+	SET X, POP
+	SET Y, POP
+}
+
+:_strcmp
+	SET B, 0
+:_strcmp_loop
+	IFE [I], 0
+		IFE [J], 0
+			SET PC, _strcmp_success
+	IFN [I], [J]
+		SET PC, _strcmp_failure
+	ADD I, 1
+	ADD J, 1
+	ADD B, 1
+	SET PC, _strcmp_loop
+:_strcmp_failure
+	SET A, 0
+	SET PC, POP
+:_strcmp_success
+	SET A, 1
+	SET PC, POP
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; strcmp ( String a, String b )
+; compares two strings. returns A = 1 on success, 0 on failure
+; B is the position of failure / length of the string
+#macro strcmp( stra, strb ) {
+	SET PUSH, J
+	SET PUSH, I
+	SET I, stra
+	SET J, strb
+	JSR _strcmp
+	SET I, POP
+	SET J, POP
 }
