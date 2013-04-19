@@ -69,13 +69,13 @@
 	BOR C, 0xf000
 	SET [Z], C
 	SET [Z+1], 0x8088
+	RFI 0
 	
 :_shell_nonascii
 	IFE C, 0x11
 		SET PC, _shell_return
 	IFE C, 0x10
 		SET PC, _shell_backspace
-:_shell_it_ret
 	RFI 0
 	
 :_shell_return
@@ -92,28 +92,49 @@
 	;strcmp( _shell_command, _shell_commands )
 	SET I, _shell_command
 	SET J, _shell_commands
+	SET C, 0
+:_shell_cmd_loop
+
+	;strcmp( _shell_command, _shell_commands )
+	SET I, _shell_command
+	SET J, _shell_commands
+	ADD J, C
+	IFG J, _shell_commands_end
+		SET PC, fail
 	JSR _strcmp
 	
 	IFN A, 1
-		SET PC, _shell_return_reentry
+		SET PC, _shell_cmd_loop_back
 	ADD B, _shell_commands
 	ADD B, 1
-	SET PC, [B]
+	SET [0x8000], 0xef52
+	RFI 0
+	;SET PC, [B]
+	
+:_shell_cmd_loop_back
+	ADD C, B
+	ADD C, 2
+	SET PC, _shell_cmd_loop
+	
 :_shell_return_reentry
 	SET [_shell_command], 0
-	SET PC, _shell_it_ret
+	RFI 0
 	
 :_shell_backspace
 	IFL X, 1
-		SET PC, _shell_it_ret
+		RFI 0
 	SET Z, X
 	ADD Z, Y
 	SET [Z], 0x8088
 	SET [Z+1], 0
 	SUB X, 1
 	SET [_shell_command+X], 0
-	SET PC, _shell_it_ret
-	
+	RFI 0
+
+:fail
+	SET [0x8000], 0xf441
+	SET PC, _shell_return_reentry
+
 :test1
 	;memset( 0x8000, 0x80, 0xdb41 )
 	SET X, 0x8000
