@@ -4,30 +4,36 @@
 ; Author:  S0lll0s
 ; *************************
 
-:_memcpy
+:x_memcpy
 	SET PUSH, X
 	SET PUSH, Z
 	SET X, 0
 	SET Z, Y
 	SUB Y, 4
-:_memcpy_loop
+:x_memcpy_loop
 	IFG X, Y
-		SET PC, _memcpy_after
+		SET PC, x_memcpy_after
 	STI I, J
 	STI I, J
 	STI I, J
 	STI I, J
 	ADD X, 4
-	SET PC, _memcpy_loop
-:_memcpy_after
+	SET PC, x_memcpy_loop
+:x_memcpy_after
 	IFG X, Z
-		SET PC, _memcpy_end
-	STI I, J
-	SET PC, _memcpy_after
-:_memcpy_end
+		SET PC, x_memcpy_end
+	STI [I], [J]
+	SET PC, x_memcpy_after
+:x_memcpy_end
 	SET Z, POP
 	SET X, POP
 	SET PC, POP
+	
+:_memcpy
+	IFG I, Y
+		SET PC, POP
+	STI [I], [J]
+	SET PC, _memcpy
 	
 ;#macro memcpy( source, dest, length ) {
 ;	SET PUSH, Y

@@ -86,17 +86,16 @@ SET PC, _main
 	RFI 0
 	
 :_shell_return
+	IFG Y, 0x8120
+		JSR _shell_scroll
+
 	SET [_shell_command+X], 0
 	
-	; do something with the command
-	;strcmp( _shell_command, _shell_commands )
 	SET I, _shell_command
-	SET J, _shell_commands
 	SET C, 0
 :_shell_cmd_loop
 
 	;strcmp( _shell_command, _shell_commands )
-	SET I, _shell_command
 	SET J, _shell_commands
 	ADD J, C
 	IFG J, _shell_commands_end
@@ -160,6 +159,18 @@ SET PC, _main
 	SET [Y], 0xc0be   ; new prompt
 	SET [Y+1], 0x8088 ; cursor
 	SET PC, _shell_return_reentry
+
+:_shell_scroll
+	SUB Y, 0x20
+	SET PUSH, Y
+	
+	SET I, 0x8000
+	SET J, 0x8020
+	SET Y, 0x8180
+	JSR _memcpy
+	SET Y, POP
+	SET PC, POP
+
 
 :test1
 	;memset( 0x8000, 0x80, 0xdb41 )

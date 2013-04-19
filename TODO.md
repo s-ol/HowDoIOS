@@ -1,4 +1,4 @@
 Shell:
-* scrolling
+* ~~scrolling~~
 * ~~check all commands~~
 * multitask commands
