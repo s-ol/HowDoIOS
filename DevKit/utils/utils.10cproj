@@ -10,9 +10,9 @@
   </properties>
   <references />
   <files>
-    <file path="..\..\screenutils.dasm" />
-    <file path="..\..\multitask.dasm" />
-    <file path="..\..\memutils.dasm" />
-    <file path="..\..\hwenum.dasm" />
+    <file path="..\..\utils\screenutils.dasm" />
+    <file path="..\..\utils\multitask.dasm" />
+    <file path="..\..\utils\memutils.dasm" />
+    <file path="..\..\utils\hwenum.dasm" />
   </files>
 </project>

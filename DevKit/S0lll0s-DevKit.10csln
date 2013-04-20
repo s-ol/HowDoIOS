@@ -21,5 +21,6 @@
   <projects>
     <project path="shell\shell.10cproj" />
     <project path="utils\utils.10cproj" />
+    <project path="commands\commands.10cproj" />
   </projects>
 </solution>

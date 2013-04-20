@@ -49,27 +49,34 @@
 ;	SET Y, POP
 ;}
 
-:_memset
+:x_memset
 	ADD Y, X
-:_memset_loop
+:x_memset_loop
 	IFG X, Y
-		SET PC, _memset_after
+		SET PC, x_memset_after
 	SET [X],   Z
 	SET [X+1], Z
 	SET [X+2], Z
 	SET [X+3], Z
 	ADD X, 4
-	SET PC, _memset_loop
-:_memset_after
+	SET PC, x_memset_loop
+:x_memset_after
 	IFG X, Y
-		SET PC, _memset_end
+		SET PC, x_memset_end
 	SET [X], Z
 	ADD X, 1
-	SET PC, _memset_after
-:_memset_end
+	SET PC, x_memset_after
+:x_memset_end
 	SET Z, POP
 	SET X, POP
 	SET PC, POP
+	
+:_memset
+	IFE X, Y
+		SET PC, POP
+	SET [X], Z
+	ADD X, 1
+	SET PC, _memset
 
 ;#macro memset( loc, len, val ) {
 ;	SET PUSH, X

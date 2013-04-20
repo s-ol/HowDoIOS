@@ -6,10 +6,12 @@
     <property name="code.binaryOutputFilename">shell.bin</property>
     <property name="code.generateHexOutput">false</property>
     <property name="code.hexOutputFilename">shell.hex</property>
-    <property name="code.setFirstFile">false</property>
+    <property name="code.setFirstFile">True</property>
+    <property name="code.firstFile">..\..\shell.dasm</property>
   </properties>
   <references>
     <project>utils</project>
+    <project>commands</project>
   </references>
   <files>
     <file path="..\..\shell.dasm" />
