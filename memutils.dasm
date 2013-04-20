@@ -91,11 +91,17 @@
 		IFE [J], 0
 			SET PC, _strcmp_success
 	IFN [I], [J]
-		SET PC, _strcmp_failure
+		SET PC, _strcmp_wind
 	ADD I, 1
 	ADD J, 1
 	ADD B, 1
 	SET PC, _strcmp_loop
+:_strcmp_wind
+	IFE [J], 0
+		SET PC, _strcmp_failure
+	ADD J, 1
+	ADD B, 1
+	SET PC, _strcmp_wind
 :_strcmp_failure
 	SET A, 0
 	SET PC, POP
