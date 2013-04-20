@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="1.7.6" type="code">
+  <name>utils</name>
+  <properties>
+    <property name="code.generateBinaryOutput">true</property>
+    <property name="code.binaryOutputFilename">utils.bin</property>
+    <property name="code.generateHexOutput">false</property>
+    <property name="code.hexOutputFilename">utils.hex</property>
+    <property name="code.setFirstFile">false</property>
+  </properties>
+  <references />
+  <files>
+    <file path="..\..\screenutils.dasm" />
+    <file path="..\..\multitask.dasm" />
+    <file path="..\..\memutils.dasm" />
+    <file path="..\..\hwenum.dasm" />
+  </files>
+</project>

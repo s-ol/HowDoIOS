@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<solution version="1.7.6">
+  <name>NewSolution</name>
+  <loadout>
+    <loadout>
+      <hardware>
+        <device type="GenericClock" />
+        <device type="GenericKeyboard" />
+        <device type="LEM1802" />
+        <device type="SPED-3" />
+      </hardware>
+      <interface>
+        <primaryDisplay>LEM1802-1:1</primaryDisplay>
+      </interface>
+    </loadout>
+  </loadout>
+  <properties>
+    <property name="emuLoad.projectName">shell</property>
+    <property name="emuLoadMode">project</property>
+  </properties>
+  <projects>
+    <project path="shell\shell.10cproj" />
+    <project path="utils\utils.10cproj" />
+  </projects>
+</solution>
