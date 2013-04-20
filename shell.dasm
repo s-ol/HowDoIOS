@@ -7,8 +7,8 @@
 SET PC, _main
 
 :_codecave
-	;.reserve 10 ; DevCPU
-	reserve 10 ; 0x10c DevKit
+	.reserve 10 ; DevCPU
+	;reserve 10 ; 0x10c DevKit
 
 :_main
 	; HWENUMERATE( hwenum_targets, 3 ) ; hardware enumerator, results in keyboard_id, clock_id and lem1802_id
@@ -109,7 +109,29 @@ SET PC, _main
 	SET J, _shell_commands
 	ADD J, C
 	SET [Y],  0x203e ; green old prompt
+	
+	
+	IAG I
+	SET PUSH, I
+	SET PUSH, A
+	SET PUSH, B
+	SET PUSH, C
+	SET PUSH, X
+	SET PUSH, Y
+	SET PUSH, Z
+	SET PUSH, J
+	
 	JSR [J] ; execute command
+	
+	SET J, POP
+	SET Z, POP
+	SET Y, POP
+	SET X, POP
+	SET C, POP
+	SET B, POP
+	SET A, POP
+	SET I, POP
+	IAS I
 	
 	SET Z, X
 	ADD Z, Y
@@ -185,18 +207,19 @@ SET PC, _main
 :test2
 	;memset( 0x8000, 0x80, 0xbd45 )
 	SET X, 0x8000
-	SET Y, 0x80
-	SET Z, 0xbd45
+	SET Y, 0x8180
+	SET Z, 0xbf41
 	JSR _memset
 	SET PC, POP
 
 :_shell_command
-	;.reserve 32  ; DevCPU syntax
-	reserve 10  ; 0x10c DevKit syntax
+	.reserve 32  ; DevCPU syntax
+	;reserve 10  ; 0x10c DevKit syntax
 	
 :_shell_commands
 	dat "test", 0, test1
 	dat "toast", 0, test2
+	dat "editor", 0, _editor
 :_shell_commands_end
 
 :_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
@@ -205,19 +228,17 @@ SET PC, _main
 
 ; hardware enumeration
 :setup_keyboard
-            SET [keyboard_id], I   ; I holds the hardware ID, alternatively check hwenum_targets + 3
-            SET PC, POP            ; Identified handlers need to pop PC
+	SET [keyboard_id], I   ; I holds the hardware ID, alternatively check hwenum_targets + 3
+	SET PC, POP            ; Identified handlers need to pop PC
 
 :setup_clock
-            SET [clock_id], I
-            SET PC, POP
+	SET [clock_id], I
+	SET PC, POP
             
 :setup_lem1802
-    		SET [lem1802_id], I
-            SET PC, POP
-
+	SET [lem1802_id], I
 :setup_unknown
-            SET PC, POP
+	SET PC, POP
 
 
 :keyboard_id DAT 0xffff
@@ -230,5 +251,12 @@ SET PC, _main
 	DAT 0x30cf, 0x7406, 0xffff, setup_keyboard  ; one hardware setup is 4 words long
 	DAT 0x7349, 0xf615, 0xffff, setup_lem1802   ; Format: 4 higher ID bits, 4 lower ID bits, recognized
 	DAT 0x12d0, 0xb402, 0xffff, setup_clock     ; hardware ID (default 0xffff), last address to hwhandler
-	
+
+.include commands/editor.dasm
+
+.include utils/hwenum.dasm
+.include utils/memutils.dasm
+.include utils/screenutils.dasm
+.include utils/multitask.dasm
+
 :end
