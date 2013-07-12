@@ -1,0 +1,44 @@
+; *************************
+; Project: S0lllOS
+; File: memorytest.dasm
+;  Tests memory.dasm by getting to LEM1802 buffers (each 0x182w) and writing "A" and "B" to them, then switching between them.
+;  Connect a LEM1802 to hardware port 1
+; *************************
+
+:_main
+	; jsr proc_get_id
+	SET A, 0x182 ; memory to request (0x182)
+	SET B, 0x1337 ; proc id
+	JSR _mem_alloc_memory
+	SET [lem_ids], A
+	
+	SET A, 0x182 ; memory to request (0x182)
+	SET B, 0x1337 ; proc id
+	JSR _mem_alloc_memory
+	SET [lem_ids+1], A
+	
+	SET B, [lem_ids]
+	SET [B], 0xf041 ; write an A to screen 1
+	SET B, [lem_ids+1]
+	SET [B+1], 0xf042 ; write a B to screen 2
+	
+	SET A, 0
+:bigl
+	SET B, [lem_ids]
+	HWI 0 ; map screen to A
+	
+	SET C, 0
+:_l	ADD C, 1
+	IFN C, 0xfff
+		SET PC, _l
+		
+	SET B, [lem_ids+1]
+	HWI 0 ; map screen to A
+	SET C, 0
+:_2	ADD C, 1
+	IFN C, 0xfff
+		SET PC, _2
+	SET PC, bigl
+:lem_ids dat 0, 0
+
+.include "memory.dasm"
