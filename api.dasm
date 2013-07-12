@@ -1,0 +1,40 @@
+; *************************
+; Project: S0lllOS
+; File: api.dasm
+; *************************
+
+; OS
+:os_version			dat 0		; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor
+
+; PROC
+:proc_exit			dat 0		; terminate the current (calling) process
+:proc_getid			dat 0		; returns pid of the calling process (A)
+:proc_fork			dat 0		; copies the calling process. returns the child pid in the main, 0 in the child process
+:proc_kill			dat 0		; terminate process with pid in A
+:proc_exec			dat 0		; create a new process from the memory at A
+
+; IO
+:puts				dat 0		; write a string to the console (if connected)
+:gets				dat 0		; wait for a string on the console (if connected)
+
+; UTILS
+:memset				dat 0		; set memory between (including) A and B to C
+:memcpy				dat 0		; copy memory between (including) A and B too memory starting at C
+:strcmp				dat 0		; compare two strings, returns 1 on success, B is the last character
+
+; HW
+:claim_hardware		dat 0		; turn off interrupts with message A in all other processes
+:realease_hardware	dat 0		; reenable interrupts for message A
+:register_interrupt	dat 0		; register the interrupt handler for message A at B
+:remove_interrupt 	dat 0		; remove the interrupt handler for message A
+
+; MSG
+:msg_poll			dat 0		; poll a message from the queue into memory at A, returns 1 on success, 0 if no new message
+:msg_send			dat 0		; send message B to process with id A
+
+; MEM management
+:mem_alloc			dat 0		; allocate A words of memory for the current process, returns 0 or the address
+:mem_free			dat 0		; free the memory at A
+
+; SYS
+:sys_shutdown		dat 0		; shutdown the system (kill all processes and halt)

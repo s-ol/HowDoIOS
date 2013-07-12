@@ -30,9 +30,11 @@
 	SET PC, POP
 	
 :_memcpy
-	IFG I, Y
+	IFG A, C
 		SET PC, POP
-	STI [I], [J]
+	SET [A], [V]
+	ADD A, 1
+	ADD B, 1
 	SET PC, _memcpy
 	
 ;#macro memcpy( source, dest, length ) {
@@ -72,10 +74,10 @@
 	SET PC, POP
 	
 :_memset
-	IFE X, Y
+	IFG A, B
 		SET PC, POP
-	SET [X], Z
-	ADD X, 1
+	SET [A], C
+	ADD A, 1
 	SET PC, _memset
 
 ;#macro memset( loc, len, val ) {
