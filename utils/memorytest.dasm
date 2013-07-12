@@ -45,4 +45,4 @@
 	SET PC, bigl
 :lem_ids dat 0, 0
 
-.include "../memory.dasm"
+.include "../lib/memory.dasm"
