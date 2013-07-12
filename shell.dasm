@@ -4,13 +4,13 @@
 ; File:    shell.dasm
 ; *************************
 
-SET PC, _main
+SET PC, _shell
 
 :_codecave
 	.reserve 10 ; DevCPU
 	;reserve 10 ; 0x10c DevKit
 
-:_main
+:_shell
 	; HWENUMERATE( hwenum_targets, 3 ) ; hardware enumerator, results in keyboard_id, clock_id and lem1802_id
 	SET C, hwenum_targets
  	SET Y, 3
@@ -111,6 +111,7 @@ SET PC, _main
 	SET [Y],  0x203e ; green old prompt
 	
 	
+	SET PUSH, I
 	IAG I
 	SET PUSH, I
 	SET PUSH, A
@@ -120,9 +121,11 @@ SET PC, _main
 	SET PUSH, Y
 	SET PUSH, Z
 	SET PUSH, J
+	SET PUSH, SP
 	
 	JSR [J] ; execute command
 	
+	SET SP, POP
 	SET J, POP
 	SET Z, POP
 	SET Y, POP
@@ -132,6 +135,7 @@ SET PC, _main
 	SET A, POP
 	SET I, POP
 	IAS I
+	SET I, POP
 	
 	SET Z, X
 	ADD Z, Y
@@ -195,12 +199,6 @@ SET PC, _main
 
 
 :test1
-	;memset( 0x8000, 0x80, 0xdb41 )
-	;SET X, 0x8000
-	;SET Y, 0x80
-	;SET Z, 0xdb41
-	;JSR _memset
-	;SUB PC, 1
 	SET [0x80fa], 0x5133
 	SET PC, POP
 	

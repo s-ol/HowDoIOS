@@ -5,27 +5,30 @@
 ; *************************
 
 :_editor
-	;SET C, hwenum_targets
- 	;SET Y, 2
-	;JSR _hwenum
-	
-	IAS _editor_interrupt
-	
-    SET A, 3
-    SET B, 2          ; maybe this enables interrupts again?
-    HWI [keyboard_id]
-    
-	SET X, 0
-:_editor_loop
-	;IFE [_editor_exit_flag], 1
-	;	SET PC, _editor_exit
-	SET PC, _editor_loop
+	;SET Y, 0
+	;IAG X
+	;IAS _editor_interrupt
+    SET [0x8001], 0x3541
+    ;SET Y, 0
+    ;IFN Y, 1
+    ;	SET PC, _editor
+:_test_loop
+	SET B, 0x20
+	HWI [keyboard_id]         ; wait for space
+	SET X, [keyboard_id]
+	IFN C, 1
+		SET PC, _test_loop
+    SET PC, POP
 	
 :_editor_interrupt
-	SET [0x8001], 0x2041  ; it seems it doesnt...
-	SET [_editor_exit_flag], 1
+	SET [0x8000], 0x2041
+	IAS X
+	SET Y, 0
 	RFI 0
-	
+
+
+
+;;;; IGNORE BELOW ;;;; (for now)
 	;; "regular" editor_interrupt code, won't be reached
 	IFN A, 2
 		RFI 0
@@ -65,11 +68,8 @@
 	
 :_editor_esc
 	SET [0x8000], 0x2041
-	SET [_editor_exit_flag], 1
 	RFI 0
 
 :_editor_exit
 	SET [0x8000], 0x2062
 	SET PC, POP
-
-:_editor_exit_flag DAT 0
