@@ -10,11 +10,15 @@
 	SET A, 0x182 ; memory to request (0x182)
 	SET B, 0x1337 ; proc id
 	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SUB PC, 1
 	SET [lem_ids], A
 	
 	SET A, 0x182 ; memory to request (0x182)
 	SET B, 0x1337 ; proc id
 	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SUB PC, 1
 	SET [lem_ids+1], A
 	
 	SET B, [lem_ids]

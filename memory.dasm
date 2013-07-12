@@ -3,10 +3,11 @@
 ; File: memory.dasm
 ; *************************
 
+; _mem_alloc_memory ("MALLOC")
+; Arguments: A - size
+;        	 B - pid
+; Returns:   A - pointer to memory / 0 on failure
 :_mem_alloc_memory
-	; INPUT: A - size
-	;        B - pid
-	; RETURNS: A - pointer to memory
 	SET PUSH, I
 	SET PUSH, B ; pid
 	
