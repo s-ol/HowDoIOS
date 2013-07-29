@@ -203,9 +203,9 @@ SET PC, _shell
 	
 :test2
 	;memset( 0x8000, 0x80, 0xbd45 )
-	SET X, 0x8000
-	SET Y, 0x8180
-	SET Z, 0xbf41
+	SET A, 0x8000
+	SET B, 0x8180
+	SET C, 0xbf41
 	JSR _memset
 	SET PC, POP
 

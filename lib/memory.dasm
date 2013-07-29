@@ -13,47 +13,47 @@
 	SET PUSH, B ; pid
 	
 	SET B, 0
-:_mem_alloc_memory_sizel
+:.sizel
 	IFG [_mem_buddy_sizes+B], A
-		SET PC, _mem_alloc_memory_sized
+		SET PC, .sized
 	ADD B, 1
-	SET PC, _mem_alloc_memory_sizel
-:_mem_alloc_memory_sized
+	SET PC,.sizel
+:.sized
 	SET C, B ; B does now contain the buddy size (2^B > A)
 
-:_mem_alloc_memory_findfreel
+:.findfreel
 	IFE [_mem_core_buddies+C], 0
-		SET PC, _mem_alloc_memory_inc_size
+		SET PC, .inc_size
 	SET I, [_mem_core_buddies+C]
-:_mem_alloc_memory_inner_freel
+:.inner_freel
 	IFE [I], 0 ; found a free one
-		SET PC, _mem_alloc_memory_inner_freed
+		SET PC, .inner_freed
 	IFE [I+2], 0 ; end of this list
-		SET PC, _mem_alloc_memory_inc_size
+		SET PC, .inc_size
 	SET I, [I+2]
-	SET PC, _mem_alloc_memory_inner_freel
-:_mem_alloc_memory_inc_size
+	SET PC, .inner_freel
+:.inc_size
 	ADD C, 1
-	IFN C, 13
-		SET PC, _mem_alloc_memory_findfreel
+	IFN C, [_mem_arena_info+4]
+		SET PC, .findfreel
 	SET A, POP ; no free memory
 	SET A, 0
-	SET PC, _mem_alloc_memory_return
+	SET PC, .return
 	
-:_mem_alloc_memory_inner_freed ; C - buddy size index, I - buddy descriptor addr
+:.inner_freed ; C - buddy size index, I - buddy descriptor addr
 	IFE C, B ; buddy is ready
-		SET PC, _mem_alloc_memory_alloc_ret
-	JSR _mem_alloc_memory_split ; splits buddy I, I = buddy #1 descriptor, decrements C
-	SET PC, _mem_alloc_memory_inner_freed
+		SET PC, .alloc_ret
+	JSR .split ; splits buddy I, I = buddy #1 descriptor, decrements C
+	SET PC, .inner_freed
 	
-:_mem_alloc_memory_alloc_ret
+:.alloc_ret
 	SET [I], POP ; pid
 	SET A, [I+1] ; I+1 - buddy loc
-:_mem_alloc_memory_return
+:.return
 	SET I, POP
 	SET PC, POP
 	
-:_mem_alloc_memory_split
+:.split
 	SET PUSH, X
 	SET PUSH, Y
 	SET Y, _mem_core_buddies
@@ -61,15 +61,15 @@
 	SET X, Y
 	SUB X, 2
 	IFE [Y], I
-		SET PC, _mem_alloc_memory_split_find_prevd
+		SET PC, .split_find_prevd
 	SET Y, [Y]
-:_mem_alloc_memory_split_find_prevl
+:.split_find_prevl
 	IFE Y, I
-		SET PC, _mem_alloc_memory_split_find_prevd
+		SET PC, .split_find_prevd
 	SET X, Y
 	SET Y, [Y+2] ; next in chain
-	SET PC, _mem_alloc_memory_split_find_prevl
-:_mem_alloc_memory_split_find_prevd
+	SET PC, .split_find_prevl
+:.split_find_prevd
 	SUB C, 1
 	SET [X+2], [I+2] ; break out split buddy (X - prev descriptor)
 	SET Y, [_mem_arena_info+2] ; last buddy desc
@@ -83,15 +83,15 @@
 	SET Y, _mem_core_buddies
 	ADD Y, C
 	IFN [Y], 0
-		SET PC, _mem_alloc_memory_split_findl
+		SET PC, .split_findl
 	SUB Y, 2
-	SET PC, _mem_alloc_memory_done
-:_mem_alloc_memory_split_findl
+	SET PC, .split_done
+:.split_findl
 	IFE [Y+2], 0
-		SET PC, _mem_alloc_memory_done
+		SET PC, .split_done
 	SET Y, [Y+2]
-	SET PC, _mem_alloc_memory_split_findl
-:_mem_alloc_memory_done
+	SET PC, .split_findl
+:.split_done
 	SET [Y+2], I ; add desc #1 and #2 to the list
 	SET X, POP
 	SET Y, POP
@@ -118,6 +118,7 @@ dat "ARENA INFO"
 :_mem_arena_info
 	dat _mem_arena, 0x2000
 	dat _mem_kernel_memory+3, 0x7fd
+	dat 13
 
 dat "KERNEL MEM"
 :_mem_kernel_memory
