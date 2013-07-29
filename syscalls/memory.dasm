@@ -1,0 +1,13 @@
+; MEM_ALLOC (0xf060)
+; allocates A words of memory for the current process, returns 0 or the address
+:_mem_alloc
+	SET A, POP
+	SET B, 0 ; current pid
+	JSR _mem_alloc_memory
+	SET PC, POP
+
+; MEM_FREE (0xf061)
+; frees the memory at A
+:_mem_free
+	SET A, POP
+	SET PC, POP

@@ -1,0 +1,70 @@
+; PUTS (0xf020)
+; writes string at A to the console (if connected)
+:_puts
+	SET A, POP
+	SET PC, POP
+	
+; GETS (0xf021)
+; ; waits for a string on the console, write to A (if connected)
+:_gets
+	SET A, POP
+	SET PC, POP
+	
+; FOPEN (0xf022)
+; opens file with name string at A, returns file descriptor or 0 in A
+:_fopen
+	SET A, POP
+	SET PC, POP
+	RFI 0
+	
+; FCLOSE (0xf023)
+; closes file descriptor A
+:_fclose
+	SET A, POP
+	SET PC, POP
+	
+; FPUTS (0xf024)
+; writes string at B into file A, starting from current cursor
+:_fputs
+	SET A, POP
+	SET PC, POP
+
+; FGETS (0xf025)
+; gets zero-teminated string from file A to memory at B
+:_fgets
+	SET A, POP
+	; get zero-teminated string from file A to memory at B
+	SET PC, POP
+
+; FGETSN (0xf026)
+; gets zero-terminated string or C words from file A to memory at B
+:_fgetsn
+	SET A, POP
+	; get zero-terminated string or C words from file A to memory at B
+	SET PC, POP
+
+; FSEEK (0xf027)
+; seeks forward B words in file A, starting from current cursor
+:_fseek
+	SET A, POP
+	; add B to file cursor index for fd A
+	SET PC, POP
+
+; FPOS (0xf028)
+; goes to position B words from start of file A
+:_fpos
+	SET A, POP
+	; set file cursor index for fd A
+	SET PC, POP
+	
+; FWRITE (0xf029)
+; writes C words from B into file A
+:_fwrite
+	SET A, POP
+	SET PC, POP
+	
+; FREAD (0xf02a)
+; reads C words from file A into memory at B, starting from current cursor
+:_fread
+	SET A, POP
+	SET PC, POP

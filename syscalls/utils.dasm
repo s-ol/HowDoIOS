@@ -1,0 +1,50 @@
+; MEMSET (0xf030 )
+; sets memory between (including) A and B to C
+:_memset
+	SET A, POP
+:.loop
+	IFG A, B
+		SET PC, POP
+	SET [A], C
+	ADD A, 1
+	SET PC, .loop
+
+; MEMCPY (0xf031 )
+; copies memory between (including) A and B too memory starting at C
+:_memcpy
+	SET A, POP
+:.loop
+	IFG A, C
+		SET PC, POP
+	SET [A], [B]
+	ADD A, 1
+	ADD B, 1
+	SET PC, .loop
+
+; STRCMP (0xf032)
+; compares two strings, returns 1 on success, B is the last character
+:_strcmp
+	SET A, POP
+	SET C, 0
+:_strcmp_loop
+	IFE [A], 0
+		IFE [B], 0
+			SET PC, _strcmp_success
+	IFN [A], [B]
+		SET PC, _strcmp_wind
+	ADD A, 1
+	ADD B, 1
+	ADD C, 1
+	SET PC, _strcmp_loop
+:_strcmp_wind
+	IFE [B], 0
+		SET PC, _strcmp_failure
+	ADD B, 1
+	ADD C, 1
+	SET PC, _strcmp_wind
+:_strcmp_failure
+	SET A, 0
+	SET PC, POP
+:_strcmp_success
+	SET A, 1
+	SET PC, POP

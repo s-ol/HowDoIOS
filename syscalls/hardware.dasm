@@ -1,0 +1,23 @@
+; CLAIM_HARDWARE (0xf040)
+; turns off interrupts with message A in all other processes
+:_claim_hardware
+	SET A, POP
+	SET PC, POP
+
+; RELEASE_HARDWARE (0xf041)
+; reenables interrupts for message A
+:_release_hardware
+	SET A, POP
+	SET PC, POP
+
+; REGISTER_INTERRUPT (0xf042)
+; registers the interrupt handler for message A at B
+:_register_interrupt
+	SET A, POP
+	SET PC, POP
+
+; REMOVE_INTERRUPT  (0xf043)
+; removes the interrupt handler for message A
+:_remove_interrupt 
+	SET A, POP
+	SET PC, POP

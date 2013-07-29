@@ -1,0 +1,14 @@
+; OS_VERSION (0xf000)
+; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor
+:_os_version
+	SET A, POP ; pop the A that is to be overridden
+	SET A, 0x0100 ; 1.0
+	SET PC, POP ; RFI would restore the old A
+	
+; OS_SHUTDOWN (0xf001)
+; shuts the system down (kills all processes and halts)
+:_sys_shutdown
+	; kill all processes
+	; close all files
+	; infinite loop (wait for poweroff)
+	SET PC, POP

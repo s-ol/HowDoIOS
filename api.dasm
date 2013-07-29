@@ -5,45 +5,43 @@
 
 ; OS
 :os_version			dat 0xf000	; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor
+:os_shutdown		dat 0xf001	; shuts the system down (kills all processes and halts)
 
 ; PROC
 :proc_exit			dat 0xf010	; terminate the current (calling) process
 :proc_getid			dat 0xf011	; returns pid of the calling process (A)
 :proc_fork			dat 0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
 :proc_kill			dat 0xf013	; terminate process with pid in A
-:proc_exec			dat 0xf014	; create a new process from the memory at A
+:proc_exec			dat 0xf014	; creates a new process from the memory at A, returns pid in A
 
 ; IO
-:puts				dat 0xf020	; write a string to the console (if connected)
-:gets				dat 0xf021	; wait for a string on the console (if connected)
-:fopen				dat 0xf022	; open file with name string at A, returns file descriptor or 0 in A
-:fclose				dat 0xf023	; close file descriptor A
-:fputs				dat 0xf024	; write string at B into file A, starting from current cursor
-:fgets				dat 0xf025	; get zero-terminated string from file A to memory at B
-:fgetsn				dat 0xf026	; get zero-terminated string or C words from file A to memory at B
-:fseek				dat 0xf027	; seek forward B words in file A, startinf from current cursor
-:fpos				dat 0xf028	; goto position B words from start of file A
-:fwrite				dat 0xf029	; write C words from B into file A, starting from current cursor
-:fread				dat 0xf02a	; read C words from B into file A, starting from current cursor
+:puts				dat 0xf020	; writes a string to the console (if connected)
+:gets				dat 0xf021	; waits for a string on the console (if connected)
+:fopen				dat 0xf022	; opens file with name string at A, returns file descriptor or 0 in A
+:fclose				dat 0xf023	; closes file descriptor A
+:fputs				dat 0xf024	; writes string at B into file A, starting from current cursor
+:fgets				dat 0xf025	; gets zero-terminated string from file A to memory at B
+:fgetsn				dat 0xf026	; gets zero-terminated string or C words from file A to memory at B
+:fseek				dat 0xf027	; seeks forward B words in file A, starting from current cursor
+:fpos				dat 0xf028	; goes to position B words from start of file A
+:fwrite				dat 0xf029	; writes C words from B into file A
+:fread				dat 0xf02a	; reads C words from file A into memory at B, starting from current cursor
 
 ; UTILS
-:memset				dat 0xf030	; set memory between (including) A and B to C
-:memcpy				dat 0xf031	; copy memory between (including) A and B too memory starting at C
-:strcmp				dat 0xf032	; compare two strings, returns 1 on success, B is the last character
+:memset				dat 0xf030	; sets memory between (including) A and B to C
+:memcpy				dat 0xf031	; copies memory between (including) A and B too memory starting at C
+:strcmp				dat 0xf032	; compares two strings, returns 1 on success, B is the last character
 
 ; HW
-:claim_hardware		dat 0xf040	; turn off interrupts with message A in all other processes
-:realease_hardware	dat 0xf041	; reenable interrupts for message A
-:register_interrupt	dat 0xf042	; register the interrupt handler for message A at B
-:remove_interrupt 	dat 0xf043	; remove the interrupt handler for message A
+:claim_hardware		dat 0xf040	; turns off interrupts with message A in all other processes
+:release_hardware	dat 0xf041	; reenables interrupts for message A
+:register_interrupt	dat 0xf042	; registers the interrupt handler for message A at B
+:remove_interrupt 	dat 0xf043	; removes the interrupt handler for message A
 
 ; MSG
-:msg_poll			dat 0xf050	; poll a message from the queue into memory at A, returns 1 on success, 0 if no new message
-:msg_send			dat 0xf051	; send message B to process with id A
+:msg_poll			dat 0xf050	; polls a message from the queue into memory at A, returns 1 on success, 0 if no new message
+:msg_send			dat 0xf051	; sends message B to process with id A
 
 ; MEM management
-:mem_alloc			dat 0xf060	; allocate A words of memory for the current process, returns 0 or the address
-:mem_free			dat 0xf061	; free the memory at A
-
-; SYS
-:sys_shutdown		dat 0xf070	; shutdown the system (kill all processes and halt)
+:mem_alloc			dat 0xf060	; allocates A words of memory for the current process, returns 0 or the address
+:mem_free			dat 0xf061	; frees the memory at A

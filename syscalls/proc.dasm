@@ -1,0 +1,42 @@
+; PROC_EXIT (0xf010)
+; terminates the current (calling) process
+:_proc_exit
+	SET PUSH, 0 ; Current Process ID
+	SET PC, _proc_kill
+
+; PROC_GETID (0xf012)
+; returns pid of the calling process (A)
+:_proc_getid
+	ADD SP, 1
+	; A: Current Pid
+	SET PC, POP
+
+; PROC_FORK (0xf012)
+; copies the calling process. returns the child pid in the main, 0 in the child process
+:_proc_fork
+	; allocate new memory in current process size
+	; copy process
+	; duplicate entry in processes
+	; set A to 0 in child register entries
+	ADD SP, 1
+	; A: Child Pid
+	SET PC, POP
+
+; PROC_KILL (0xf013)
+; terminates process with pid in A
+:_proc_kill
+	SET A, POP
+	; free process' dynamically allocated memory
+	; remove from multitasking list
+	; remove process code memory
+	SET PC, POP
+
+; PROC_EXEC (0xf014)
+; creates a new process from the memory at A, returns pid in A
+:_proc_exec
+	SET A, POP
+	; dis-own memory at A
+	; add entry in process table
+	SET A, 0 ; new pid
+	SET PC, POP
+	
