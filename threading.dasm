@@ -1,3 +1,10 @@
+:_threading_next_slice
+	; store all registers (A and PC from stack)
+	; find next thread
+	; set current pid (update _threading_info+1 and +2)
+	; load all registers
+	; jump to PC
+
 :_threading_info
 	dat 0 ; num threads
 	dat 0 ; current process id
@@ -6,5 +13,5 @@
 ; thread info:
 
 ; dat pid
-; dat A, B, C, X, Y, Z, I, J, PC, SP, EX
-; dat flags, flags, ????, ???? ; pad to power of two (allocation)
+; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, interrupt address
+; dat flags, flags, ???? ; pad to power of two (16 / allocation)

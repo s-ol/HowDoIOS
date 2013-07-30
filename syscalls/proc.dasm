@@ -38,4 +38,7 @@
 	; add entry in process table
 	SET A, 0 ; new pid
 	SET PC, POP
-	
+
+; PROC_SKIP (0xf015)
+; skips current process / slice (give other processes more time)
+; is directly mapped to _threading_next_slice, see handler.dasm

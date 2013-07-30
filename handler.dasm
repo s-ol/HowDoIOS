@@ -1,6 +1,10 @@
 :_interrupt_handler
 	IFG A, 0xf000 ; definiteley a syscall, we can modify A, B and C registers
 		SET PC, _interrupt_handle_syscall
+	
+	IFE A, 0xffff ; clock / next slice
+		SET PC, _threading_next_slice
+	
 	SET PUSH, A
 	SET A, [_threading_info + 2] ; current process thread info
 	SET [A+2], B		; save B register
@@ -50,6 +54,7 @@
 	dat 0xf012, _proc_fork
 	dat 0xf013, _proc_kill
 	dat 0xf014, _proc_exec
+	dat 0xf015, _threading_next_slice ; _proc_skip is directly mapped to _threading_next_slice
 	
 	; IO
 	dat 0xf020, _puts
