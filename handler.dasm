@@ -1,0 +1,87 @@
+:_interrupt_handler
+	IFG A, 0xf000 ; definiteley a syscall, we can modify A, B and C registers
+		SET PC, _interrupt_handle_syscall
+	SET PUSH, A
+	SET A, [_threading_info + 2] ; current process thread info
+	SET [A+2], B		; save B register
+	SET [A+3], C		; save C register
+	SET A, POP			; restore interrupt message
+	
+	; if claimed by single process
+		; push PC and A, set PC to process' IA
+	; else
+		; go through hardware handler list
+		; notify all registered processes (push PC and set PC to handler addr)
+
+	SET C, [_threading_info + 2] ; current process thread info
+	SET B, [C+2]	; restore B
+	SET C, [C+3]	; restore C itself
+	RFI 0			; restore A and jump back
+
+:_interrupt_handle_syscall
+	SET PUSH, B ; save parameter B
+	SET B, _api_routines
+:.loop
+	IFE A, [B] ; gotcha
+		SET PC, .call
+	IFE B, _api_rountines_end
+		SET PC, .unknown
+	ADD B, 2
+	SET PC, .loop
+:.unknown
+	SET B, POP ; restore parameter B (actually not required)
+	SET PEEK, 0 ; error, kinda (set A to restore)
+	RFI 0
+	
+:.call
+	SET PUSH, B		; push routine
+	SET B, [SP+1]	; restore parameter B
+	ADD SP, 1		; 'pop' routine
+	SET PC, [SP-1]	; jump to rountine
+
+:_api_routines
+	; OS
+	dat 0xf000, _os_version
+	dat 0xf001, _os_shutdown
+	
+	; PROC
+	dat 0xf010, _proc_exit
+	dat 0xf011, _proc_getid
+	dat 0xf012, _proc_fork
+	dat 0xf013, _proc_kill
+	dat 0xf014, _proc_exec
+	
+	; IO
+	dat 0xf020, _puts
+	dat 0xf021, _gets
+	dat 0xf022, _fopen
+	dat 0xf023, _fclose
+	dat 0xf024, _fputs
+	dat 0xf025, _fgets
+	dat 0xf026, _fgetsn
+	dat 0xf027, _fseek
+	dat 0xf028, _fpos
+	dat 0xf029, _fwrite
+	dat 0xf02a, _fread
+	
+	; UTILS
+	dat 0xf030, _memset
+	dat 0xf031, _memcpy
+	dat 0xf032, _strcmp
+	
+	; HW
+	dat 0xf040, _claim_hardware
+	dat 0xf041, _release_hardware
+	dat 0xf042, _register_interrupt
+	dat 0xf043, _remove_interrupt
+	
+	; MSG
+	dat 0xf050, _msg_poll
+	dat 0xf051, _msg_send
+	
+	; MEM management
+	dat 0xf060, _mem_alloc
+	dat 0xf061, _mem_free
+:_api_rountines_end
+
+#include "syscalls/*.dasm"

@@ -1,0 +1,10 @@
+:_threading_info
+	dat 0 ; num threads
+	dat 0 ; current process id
+	dat 0 ; current process thread info
+	
+; thread info:
+
+; dat pid
+; dat A, B, C, X, Y, Z, I, J, PC, SP, EX
+; dat flags, flags, ????, ???? ; pad to power of two (allocation)
