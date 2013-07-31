@@ -1,13 +1,13 @@
 ; PROC_EXIT (0xf010)
 ; terminates the current (calling) process
 :_proc_exit
-	SET PUSH, [_threading_info + 2] ; Current Process ID
+	SET PUSH, [_threading_current_pid] ; Current Process ID
 	SET PC, _proc_kill
 
 ; PROC_GETID (0xf012)
 ; returns pid of the calling process (A)
 :_proc_getid
-	SET PEEK, [_threading_info + 2] ; directly set [SP] (stored A)
+	SET PEEK, [_threading_current_pid] ; directly set [SP] (stored A)
 	RFI 0
 
 ; PROC_FORK (0xf012)
