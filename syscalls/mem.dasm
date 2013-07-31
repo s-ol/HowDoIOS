@@ -2,7 +2,7 @@
 ; allocates A words of memory for the current process, returns 0 or the address
 :_mem_alloc
 	SET A, POP
-	SET B, [_threading_current_pid] ; current pid
+	SET B, [_tasking_current_pid] ; current pid
 	JSR _mem_alloc_memory
 	SET PC, POP
 

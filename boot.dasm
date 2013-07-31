@@ -3,6 +3,13 @@
 ; File: boot.dasm
 ; *************************
 
+:_main
+	IAS _interrupt_handler
+	
+	; enumerate hardware
+	; set cycle_slice interrupt (0xffff) on clock
+	; launch first thread
+
 .include lib/hwenum.dasm
 .include lib/memutils.dasm
 .include lib/screenutils.dasm
