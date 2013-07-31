@@ -5,13 +5,13 @@
 	; load all registers
 	; jump to PC
 
-:_threading_info
-	dat 0 ; num threads
-	dat 0 ; current process id
-	dat 0 ; current process thread info
+:_threading_num_threads  dat 0 ; num threads
+:_threading_current_pid	 dat 0 ; current process id
+:_threading_current_proc dat 0 ; current process thread info
 	
 ; thread info:
 
-; dat pid
+; dat pid, start of mem, size of mem (code and data sections kinda)
 ; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, interrupt address
-; dat flags, flags, ???? ; pad to power of two (16 / allocation)
+; dat flags ; pad to power of two (16 / allocation)
+

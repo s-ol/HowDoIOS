@@ -6,7 +6,7 @@
 		SET PC, _threading_next_slice
 	
 	SET PUSH, A
-	SET A, [_threading_info + 2] ; current process thread info
+	SET A, [_threading_current_proc] ; current process thread info
 	SET [A+2], B		; save B register
 	SET [A+3], C		; save C register
 	SET A, POP			; restore interrupt message
@@ -17,7 +17,7 @@
 		; go through hardware handler list
 		; notify all registered processes (push PC and set PC to handler addr)
 
-	SET C, [_threading_info + 2] ; current process thread info
+	SET C, [_threading_current_proc] ; current process thread info
 	SET B, [C+2]	; restore B
 	SET C, [C+3]	; restore C itself
 	RFI 0			; restore A and jump back
