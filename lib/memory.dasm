@@ -100,12 +100,58 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; _mem_free_memory ("FREE")
 ;; Arguments: A - pointer to memory
-;; Returns:   A - 1 on succes / 0 on failure
+;; Returns:   A - 0 on failure
 :_mem_free_memory
-	; find memories buddy info
-	; while merge possible (buddy-buddy is also free (add buddy size to _mem_arena...))
-		; merge
-		; go a level up
+	JSR _mem_find_buddy
+	SET [A], 0 ; pid = 0 / free!
+	SET C, [A+1]
+	MOD C, [_mem_buddy_sizes+1+B] ; mod next biggest buddy size
+	
+	SET A, [A+1]
+	IFE C, 0
+		SET PC, .even
+	SUB A, C ; "uneven cut" -> buddy is at [A+1] - C
+	SET PC, .check_merge
+:.even
+	ADD A, [_mem_buddy_sizes+B] ; "even cut" -> buddy is the following one ([A+1]+[budsize+B])
+:.check_merge
+	JSR _mem_find_buddy
+	IFN [A], 0 ; buddy is taken, we can exit
+		SET PC, POP
+		
+	; merge
+	; go a level up
+	SET PC, POP
+
+; pid; location; next; ??
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_find_buddy
+;; Arguments: A - pointer to memory
+;; Returns:   A - pointer to buddy info / 0 on failure
+;;            B - buddy size offset
+:_mem_find_buddy
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check
+		SET PC, .error
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+:.find_innerl
+	IFE [C+1], A ; found
+		SET PC, .end
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.end
+	SET A, C
+	SET PC, POP
+	
+:.error
+	SET A, 0
 	SET PC, POP
 
 :_mem_buddy_sizes
@@ -146,7 +192,6 @@
 ; 0x800	 - 0xfff  (0x800 / 2^11)
 ; 0x1000 - 0x1fff (0x1000 / 2^12)
 
-; pid; location; next; ??
 ; dat "ARENA"
 :_mem_arena
 .reserve 0x2000
