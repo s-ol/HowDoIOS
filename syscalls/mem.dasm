@@ -10,4 +10,5 @@
 ; frees the memory at A
 :_mem_free
 	SET A, POP
+	JSR _mem_free_memory
 	SET PC, POP
