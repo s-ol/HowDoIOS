@@ -43,6 +43,8 @@
 	IFN C, 0xfff
 		SET PC, _2
 	SET PC, bigl
+	
+dat "IDS"
 :lem_ids dat 0, 0
 
 .include "../lib/memory.dasm"

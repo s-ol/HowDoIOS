@@ -104,6 +104,8 @@
 :_mem_free_memory
 	JSR _mem_find_buddy
 	SET [A], 0 ; pid = 0 / free!
+:.recursion
+	SET PUSH, A
 	SET C, [A+1]
 	MOD C, [_mem_buddy_sizes+1+B] ; mod next biggest buddy size
 	
@@ -114,16 +116,124 @@
 	SET PC, .check_merge
 :.even
 	ADD A, [_mem_buddy_sizes+B] ; "even cut" -> buddy is the following one ([A+1]+[budsize+B])
+	SET PUSH, A ; push the first one
+	SEt A, C ; make A the 2nd one
 :.check_merge
 	JSR _mem_find_buddy
 	IFN [A], 0 ; buddy is taken, we can exit
-		SET PC, POP
+		SET PC, .pop_and_exit
+	
+	SET C, POP ; pop the first one (parent addr)
+	
+	XOR A, C ; swap A and C
+	XOR C, A
+	XOR A, C ; (A does now contain the first addr)
+	
+	SET PUSH, A
+	SET PUSH, B
+	SET PUSH, C
+	JSR _mem_unlink_info
+	SET C, POP
+	SET B, POP
+	SET A, POP
+	
+	XOR A, B ; swap A and B
+	XOR B, A ; A = size index
+	XOR A, B ; B = info loc
+	
+	SET PUSH, A
+	SET PUSH, C
+	JSR _mem_insert_info
+	SET C, POP
+	SET A, POP
+	
+	XOR A, C ; swap A and C
+	XOR C, A
+	XOR A, C ; (A does now contain the disposable block)
+	SET PUSH, C
+	JSR _mem_delete_info
+	SET C, POP
+	
+	SET A, [C+1]
+	SET PC, .recursion ; now merge parent block
+
+:.pop_and_exit
+	SET B, POP
+	SET PC, POP
+	
+; pid; location; next; ??
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_insert_info
+;; Arguments: A - buddy size index
+;;            B - buddy info location ([B+2] should be 0)
+;; Returns:   -
+:_mem_insert_info
+	SET A, [_mem_core_buddies+A]
+	IFN [A], 0
+		SET PC, .loop
+	SET [A], B
+	SET PC, POP
+:.loop
+	SET A, [A]
+	IFN [A+2], 0
+		SET PC, .loop
+	SET [A+2], B
+	SET PC, POP
 		
-	; merge
-	; go a level up
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_delete_info
+;; Arguments: A - pointer to buddy info
+;; Returns:   -
+:_mem_delete_info
+	SET [A], 0
+	SET [A+1], 0
+	SET [A+2], 0 ; set to 0, 0, 0 for safety
+	SET B, A
+	SUB B, _mem_kernel_memory
+	SET C, B
+	MOD C, 16
+	SUB B, C
+	DIV B, 3 ; the bit is in [_mem_kernel_memory_map+B]
+	SET A, 1
+	SHL A, C
+	XOR A, 0xffff ; is now 0b1111101111 (or like that)
+	AND [_mem_kernel_memory_map+B], A
+	SET PC, POP
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_unlink_info
+;; Arguments: A - pointer to buddy info
+;; Returns:   -
+:_mem_unlink_info
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check??
+		SET PC, POP
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+	IFE A, C
+		SET PC, .first
+:.find_innerl
+	IFE [C+2], A ; found
+		SET PC, .end
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.end
+	SET A, C
+	SET PC, POP
+	SET [C+2], [A+2]
+	SET [A+2], 0
+	SET PC, POP
+:.first
+	SET [_mem_core_buddies+B], [A+2]
+	SET [A+2], 0
 	SET PC, POP
 
-; pid; location; next; ??
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; _mem_find_buddy
@@ -177,10 +287,13 @@
 	dat _mem_kernel_memory+3, 0x7fd
 	dat 13
 
+:_mem_kernel_memory_map
+	dat 0b1
+	dat 0x52 ; 0x530 bits needed = 0x53 words, one is set already
 ; dat "KERNEL MEM"
 :_mem_kernel_memory
 	dat 0, _mem_arena, 0 ; 2^13 buddy, unallocated
-.reserve 0x1000
+.reserve 0xf8d ; 0xf8d + 0x3 = 0xf90, 0xf90 / 3 words = 0x530
 ; 0x0	 - 0x9	  (0x10 / 2^4) --
 ; 0x10	 - 0x19	  (0x10 / 2^4)  | 0x40 words
 ; 0x20	 - 0x39	  (0x20 / 2^5) --
