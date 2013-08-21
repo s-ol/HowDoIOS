@@ -72,14 +72,37 @@
 :.split_find_prevd
 	SUB C, 1
 	SET [X+2], [I+2] ; break out split buddy (X - prev descriptor)
-	SET Y, [_mem_arena_info+2] ; last buddy desc
+	SET Y, _mem_kernel_memory_map-1
+:.split_meml
+	ADD Y, 1
+	IFE [Y], 0xffff ; all taken
+		SET PC, .split_meml
+	SET X, 1
+:.split_mem_bl
+	IFC [Y], X ; if (B (1111110) & A (0000001) ) == 0
+		SET PC, .split_memd
+	SHL X, 1
+	SET PC, .split_mem_bl
+:.split_memd
+	BOR [Y], X ; set as taken
+	SUB Y, _mem_kernel_memory_map
+:.split_mem_sl
+	IFE X, 1
+		SET PC, .split_mem_sd
+	SHR X, 1
+	ADD Y, 1
+	SET PC, .split_mem_sl
+:.split_mem_sd
+	MUL Y, 3
+	ADD Y, _mem_kernel_memory ; first free descriptor
 	SET [Y], 0
 	SET [Y+1], [I+1]
 	ADD [Y+1], [_mem_buddy_sizes+C]
 	SET [Y+2], 0
 	SET [I], 0	 ; make new block free, location is still correct
 	SET [I+2], Y ; set successor
-	ADD [_mem_arena_info+2], 3
+	
+	;ADD [_mem_arena_info+2], 3
 	SET Y, _mem_core_buddies
 	ADD Y, C
 	IFN [Y], 0
@@ -160,8 +183,6 @@
 :.pop_and_exit
 	SET B, POP
 	SET PC, POP
-	
-; pid; location; next; ??
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; _mem_insert_info
@@ -287,13 +308,15 @@
 	dat _mem_kernel_memory+3, 0x7fd
 	dat 13
 
+dat "MEM MAP"
 :_mem_kernel_memory_map
 	dat 0b1
-	dat 0x52 ; 0x530 bits needed = 0x53 words, one is set already
-; dat "KERNEL MEM"
+	.reserve 0x52 ; 0x530 bits needed = 0x53 words, one is set already
+
+dat "KERNEL MEM"
 :_mem_kernel_memory
 	dat 0, _mem_arena, 0 ; 2^13 buddy, unallocated
-.reserve 0xf8d ; 0xf8d + 0x3 = 0xf90, 0xf90 / 3 words = 0x530
+	.reserve 0xf8d ; 0xf8d + 0x3 = 0xf90, 0xf90 / 3 words = 0x530
 ; 0x0	 - 0x9	  (0x10 / 2^4) --
 ; 0x10	 - 0x19	  (0x10 / 2^4)  | 0x40 words
 ; 0x20	 - 0x39	  (0x20 / 2^5) --
@@ -307,11 +330,11 @@
 
 ; dat "ARENA"
 :_mem_arena
-.reserve 0x2000
+	.reserve 0x2000
 
-;      ----
+;										  ----
 ;	dat 1, _mem_arena, _2, 0		; 2^4    |
-;:_2	dat 1, _mem_arena + 0x10, 0, 0	; 2^4    |
+;:_2dat 1, _mem_arena + 0x10, 0, 0	; 2^4    |
 ;	dat 1, _mem_arena + 0x20, 0, 0	; 2^5    |
 ;	dat 0, _mem_arena + 0x40, 0, 0	; 2^6    |
 ;	dat 0, _mem_arena + 0x80, 0, 0	; 2^7    |

@@ -21,30 +21,54 @@
 		SUB PC, 1
 	SET [lem_ids+1], A
 	
+	JSR _mem_free_memory
+	
+	SET A, 0x182 ; memory to request (0x182)
+	SET B, 0x1337 ; proc id
+	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SUB PC, 1
+	SET [lem_ids+1], A
+	
+	SET A, 0x182 ; memory to request (0x182)
+	SET B, 0x1337 ; proc id
+	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SUB PC, 1
+	SET [lem_ids+2], A
+	
 	SET B, [lem_ids]
 	SET [B], 0xf041 ; write an A to screen 1
 	SET B, [lem_ids+1]
 	SET [B+1], 0xf042 ; write a B to screen 2
+	SET B, [lem_ids+2]
+	SET [B+2], 0xf043 ; write a C to screen 3
 	
 	SET A, 0
-:bigl
+:_0
 	SET B, [lem_ids]
 	HWI 0 ; map screen to A
-	
 	SET C, 0
 :_l	ADD C, 1
 	IFN C, 0xfff
 		SET PC, _l
 		
 	SET B, [lem_ids+1]
-	HWI 0 ; map screen to A
+	HWI 0 ; map screen to B
 	SET C, 0
 :_2	ADD C, 1
 	IFN C, 0xfff
 		SET PC, _2
-	SET PC, bigl
+		
+	SET B, [lem_ids+2]
+	HWI 0 ; map screen to C
+	SET C, 0
+:_3	ADD C, 1
+	IFN C, 0xfff
+		SET PC, _3
+	SET PC, _0
 	
 dat "IDS"
-:lem_ids dat 0, 0
+:lem_ids dat 0, 0, 0
 
 .include "../lib/memory.dasm"
