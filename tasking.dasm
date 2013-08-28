@@ -1,20 +1,44 @@
 :_tasking_next_slice
-	; store all registers (A and PC from stack)
-	; find next thread
-	; set current pid (update _tasking_current_pid and _proc)
-	; load all registers
-	; jump to PC
+	SET A, [_tasking_current_task]
+	SET [A+0xc], POP ; store EX
+	SET [A+0x2], POP ; store A
+	SET [A+0x3], B   ; store B
+	SET [A+0x4], C   ; store C
+	SET [A+0x5], X   ; store X
+	SET [A+0x6], Y   ; store Y
+	SET [A+0x7], Z   ; store Z
+	SET [A+0x8], I   ; store I
+	SET [A+0x9], J   ; store J
+	SET [A+0xa], POP ; store PC
+	SET [A+0xb], SP  ; store SP
+	
+	SET A, [_tasking_current_task]
+	SET A, [A+1] ; A is next task's info
+	SET [_tasking_current_pid], [A]
+	SET [_tasking_current_task], A
+	
+	SET A, [A+1]
+:_tasking_first_entry
+	SET B,    [A+0x3] ; restore B
+	SET C,    [A+0x4] ; restore C
+	SET X,    [A+0x5] ; restore X
+	SET Y,    [A+0x6] ; restore Y
+	SET Z,    [A+0x7] ; restore Z
+	SET I,    [A+0x8] ; restore I
+	SET J,    [A+0x9] ; restore J
+	SET PUSH, [A+0xa] ; save PC
+	SET SP,   [A+0xb] ; restore SP
+	SET EX,   [A+0xc] ; restore EX
+	SET A,    [A+0x2] ; restore A
+	
+	SET PC, POP       ; restore PC
 
 :_tasking_num_tasks		dat 0 ; num tasks
 :_tasking_current_pid	dat 0 ; current process id
-:_tasking_current_proc	dat 0 ; current process task info
-:_tasking_list_start	dat 0 ; start of task list
-	
-; task list: (sorted with ascending pid)
-; dat pid, task info, next entry
+:_tasking_current_task	dat 0 ; current task info
 
 ; task info:
-; dat pid, start of mem, size of mem (code and data sections kinda)
+; dat pid, next entry
 ; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, interrupt address
-; dat flags ; pad to power of two (16 / allocation)
+; dat flags, flags ; pad to power of two (16 word allocation)
 

@@ -8,11 +8,40 @@
 	
 	; enumerate hardware
 	; set cycle_slice interrupt (0xffff) on clock
-	; launch first thread
+	
+	; launch first task
+	SET A, 0x16 ; process info = 16 words
+	SET B, 0xffff ; proc id
+	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SET PC, .error
+	SET [_tasking_num_tasks], 1
+	SET [_tasking_current_pid], 0xffff
+	SET [_tasking_current_task], A
+	
+	SET [A], 0xffff ; pid
+	SET [A+1], A    ; task list is cyclic
+	SET [A+0xa], 0  ; PC = ???
+	SET [A+0xe], 1  ; OS flag
+	
+	SET X, A
+	
+	SET A, 0x40 ; 64 words of stack is enough... hopefully
+	SET B, 0xffff
+	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SET PC, .error
+	ADD A, 0x3f ; go to the end of the stack memory
+	SET [X+0xb], A
+	
+	SET X, A
+	SET PC, _tasking_first_entry
+		
+:.error
+	SUB PC, 1
 
-#include lib/hwenum.dasm
-#include handler.dasm
+.include 'tasking.dasm'
+.include 'handler.dasm'
+;.include lib/hwenum.dasm
 ;.include lib/memutils.dasm
 ;.include lib/screenutils.dasm
-;.include lib/multitask.dasm
-;.include lib/memory.dasm

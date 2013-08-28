@@ -212,12 +212,12 @@
 	SET [A+2], 0 ; set to 0, 0, 0 for safety
 	SET B, A
 	SUB B, _mem_kernel_memory
+	DIV B, 3
 	SET C, B
 	MOD C, 16
-	SUB B, C
-	DIV B, 3 ; the bit is in [_mem_kernel_memory_map+B]
+	SUB B, C ; the bit is in [_mem_kernel_memory_map+B]
 	SET A, 1
-	SHL A, C
+	SHL A, C ; A = 0xb0000010000
 	XOR A, 0xffff ; is now 0b1111101111 (or like that)
 	AND [_mem_kernel_memory_map+B], A
 	SET PC, POP

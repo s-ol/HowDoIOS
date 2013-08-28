@@ -12,3 +12,5 @@
 	SET A, POP
 	JSR _mem_free_memory
 	SET PC, POP
+	
+.include 'lib/memory.dasm'
