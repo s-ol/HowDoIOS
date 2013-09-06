@@ -131,7 +131,7 @@
 	SET PUSH, A
 	SET C, [A+1]
 	SUB C, _mem_arena
-	MOD C, [_mem_buddy_sizes+1+B] ; mod next biggest buddy size
+	MOD C, [_mem_buddy_sizes_plus_one+B] ; mod next biggest buddy size
 	
 	SET A, [A+1]
 	IFE C, 0
@@ -288,6 +288,7 @@
 
 :_mem_buddy_sizes
 	dat 0x4
+:_mem_buddy_sizes_plus_one ; some assemblers don't support "[label+literal+register]"
 	dat 0x8
 	dat 0x10
 	dat 0x20
@@ -311,7 +312,7 @@
 
 dat "MEM MAP"
 :_mem_kernel_memory_map
-	dat 0b1
+	dat 0x1
 	.reserve 0x52 ; 0x530 bits needed = 0x53 words, one is set already
 
 dat "KERNEL MEM"

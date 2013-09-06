@@ -21,7 +21,7 @@
 	
 	SET [A], 0xffff ; pid
 	SET [A+1], A    ; task list is cyclic
-	SET [A+0xa], 0  ; PC = ???
+	SET [A+0xa], _empty_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A
@@ -32,12 +32,16 @@
 	IFE A, 0 ; failed to allocate memory
 		SET PC, .error
 	ADD A, 0x3f ; go to the end of the stack memory
-	SET [X+0xb], A
+	SET [X+0xb], A ; set SP
 	
-	SET X, A
+	SET A, X
 	SET PC, _tasking_first_entry
 		
 :.error
+	SUB PC, 1
+
+dat "EMPTY"
+:_empty_task
 	SUB PC, 1
 
 .include 'tasking.dasm'

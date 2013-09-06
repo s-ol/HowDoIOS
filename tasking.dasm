@@ -26,8 +26,8 @@
 	SET Z,    [A+0x7] ; restore Z
 	SET I,    [A+0x8] ; restore I
 	SET J,    [A+0x9] ; restore J
-	SET PUSH, [A+0xa] ; save PC
 	SET SP,   [A+0xb] ; restore SP
+	SET PUSH, [A+0xa] ; save PC
 	SET EX,   [A+0xc] ; restore EX
 	SET A,    [A+0x2] ; restore A
 	
@@ -41,4 +41,3 @@
 ; dat pid, next entry
 ; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, interrupt address
 ; dat flags, flags ; pad to power of two (16 word allocation)
-
