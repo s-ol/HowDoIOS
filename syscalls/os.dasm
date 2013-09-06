@@ -7,7 +7,7 @@
 	
 ; OS_SHUTDOWN (0xf001)
 ; shuts the system down (kills all processes and halts)
-:_sys_shutdown
+:_os_shutdown
 	; kill all processes
 	; close all files
 	; infinite loop (wait for poweroff)

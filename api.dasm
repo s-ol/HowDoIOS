@@ -13,6 +13,7 @@
 :proc_fork			dat 0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
 :proc_kill			dat 0xf013	; terminate process with pid in A
 :proc_exec			dat 0xf014	; creates a new process from the memory at A, returns pid in A
+:proc_skip			dat 0xf015	; skips current process / slice (give other processes more time)
 
 ; IO
 :puts				dat 0xf020	; writes a string to the console (if connected)

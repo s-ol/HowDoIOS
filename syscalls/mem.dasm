@@ -2,7 +2,7 @@
 ; allocates A words of memory for the current process, returns 0 or the address
 :_mem_alloc
 	SET A, POP
-	SET B, 0 ; current pid
+	SET B, [_tasking_current_pid] ; current pid
 	JSR _mem_alloc_memory
 	SET PC, POP
 
@@ -10,4 +10,7 @@
 ; frees the memory at A
 :_mem_free
 	SET A, POP
+	JSR _mem_free_memory
 	SET PC, POP
+	
+.include 'lib/memory.dasm'

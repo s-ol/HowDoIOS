@@ -1,15 +1,14 @@
 ; PROC_EXIT (0xf010)
 ; terminates the current (calling) process
 :_proc_exit
-	SET PUSH, 0 ; Current Process ID
+	SET PUSH, [_tasking_current_pid] ; Current Process ID
 	SET PC, _proc_kill
 
 ; PROC_GETID (0xf012)
 ; returns pid of the calling process (A)
 :_proc_getid
-	ADD SP, 1
-	; A: Current Pid
-	SET PC, POP
+	SET PEEK, [_tasking_current_pid] ; directly set [SP] (stored A)
+	RFI 0
 
 ; PROC_FORK (0xf012)
 ; copies the calling process. returns the child pid in the main, 0 in the child process
@@ -39,4 +38,7 @@
 	; add entry in process table
 	SET A, 0 ; new pid
 	SET PC, POP
-	
+
+; PROC_SKIP (0xf015)
+; skips current process / slice (give other processes more time)
+; is directly mapped to _tasking_next_slice, see handler.dasm
