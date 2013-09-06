@@ -130,6 +130,7 @@
 :.recursion
 	SET PUSH, A
 	SET C, [A+1]
+	SUB C, _mem_arena
 	MOD C, [_mem_buddy_sizes+1+B] ; mod next biggest buddy size
 	
 	SET A, [A+1]
