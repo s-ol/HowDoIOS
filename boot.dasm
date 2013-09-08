@@ -36,7 +36,7 @@
 	SET [X+0xb], A ; set SP
 	
 	SET A, X
-	SET PC, _tasking_first_entry ; jump straight to the loading
+	SET PC, _tasking_load_only ; jump straight to the loading
 		
 :.error
 	SUB PC, 1
