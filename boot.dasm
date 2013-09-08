@@ -19,12 +19,13 @@
 	SET [_tasking_current_pid], 0xffff
 	SET [_tasking_current_task], A
 	
+	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
 	SET [A+1], A    ; task list is cyclic
 	SET [A+0xa], _empty_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
-	SET X, A
+	SET X, A ; backup the task info
 	
 	SET A, 0x40 ; 64 words of stack is enough... hopefully
 	SET B, 0xffff
@@ -35,7 +36,7 @@
 	SET [X+0xb], A ; set SP
 	
 	SET A, X
-	SET PC, _tasking_first_entry
+	SET PC, _tasking_load_only ; jump straight to the loading
 		
 :.error
 	SUB PC, 1
