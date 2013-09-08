@@ -1,5 +1,5 @@
 :_interrupt_handler
-	SET PUSH, EX
+	SET PUSH, EX ; EX will change when using ADD / SUB etc, so we need to back it up
 	IFE A, 0xffff ; clock / next slice
 		SET PC, _tasking_next_slice
 
@@ -35,18 +35,22 @@
 	ADD B, 2
 	SET PC, .loop
 :.unknown
-	SET B, POP ; restore parameter B (actually not required)
-	SET PEEK, 0 ; error, kinda (set A to restore)
+	SET B, POP ; pop parameter B (not actually needed)
 	SET EX, POP ; POP the EX register for everything but slice changes
+	SET PEEK, 0 ; return 0 (error)
 	RFI 0
 	
 :.call
-	XOR B, [SP] ; swap B (routine)
-	XOR [SP], B ; and [SP] (parameter B)
+	XOR B, [SP] ; swap B (routine)...
+	XOR [SP], B ; ...and [SP] (parameter B)
 	XOR B, [SP] 
-	IFN PEEK, _tasking_next_slice
-		ADD SP, 1 ; POP the EX register for everything but slice changes
-	SET PC, POP	; jump to rountine
+	IFE PEEK, _tasking_next_slice
+		SET PC, POP ; leave EX on the stack for _tasking_next_slice
+	XOR [SP], [SP+1] ; swap [SP] (routine)...
+	XOR [SP+1], [SP] ; ...and the EX register...
+	XOR [SP], [SP+1] ; ...so we can..
+	ADD SP, 1 ; ...pop EX and then...
+	SET PC, POP	; ...jump to the rountine
 
 :_api_routines
 	; OS
