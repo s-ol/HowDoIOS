@@ -1,10 +1,10 @@
 ; PROC_EXIT (0xf010)
 ; terminates the current (calling) process
 :_proc_exit
-	SET PUSH, [_tasking_current_pid] ; Current Process ID
+	SET PEEK, [_tasking_current_pid] ; Current Process ID
 	SET PC, _proc_kill
 
-; PROC_GETID (0xf012)
+; PROC_GETID (0xf011)
 ; returns pid of the calling process (A)
 :_proc_getid
 	SET PEEK, [_tasking_current_pid] ; directly set [SP] (stored A)
@@ -26,8 +26,16 @@
 :_proc_kill
 	SET A, POP
 	; free process' dynamically allocated memory
-	; remove from multitasking list
-	; remove process code memory
+	; remove from multitasking list:
+	SET Y, [_tasking_current_task]
+:.loop
+	SET X, Y
+	SET Y, [X+1] ; go one step further
+	IFN [Y], A ; not the one we search for
+		SET PC, .loop
+	SET [X+1], [Y+1] ; Y is the one to delete, so set the parent's successor to [Y+1]
+	SET A, Y ; free the task info
+	JSR _mem_alloc_memory 		
 	SET PC, POP
 
 ; PROC_EXEC (0xf014)
