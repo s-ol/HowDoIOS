@@ -1,3 +1,5 @@
+; the main interrupt handler
+; IA should always point here. This fires all processes hooks and does the slice switching
 :_interrupt_handler
 	SET PUSH, EX ; EX will change when using ADD / SUB etc, so we need to back it up
 	IFE A, 0xffff ; clock / next slice
