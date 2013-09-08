@@ -26,6 +26,7 @@
 :_proc_kill
 	SET A, POP
 	JSR _mem_free_pid ; free process' dynamically allocated memory
+	; TODO: close all owned files
 	; remove from multitasking list
 	SET Y, [_tasking_current_task]
 :.loop
