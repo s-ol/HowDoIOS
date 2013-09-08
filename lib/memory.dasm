@@ -286,6 +286,38 @@
 	SET A, 0
 	SET PC, POP
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_free_pid
+;; Arguments: A - pid of process whose memory should be freed
+;; Returns:   -
+:_mem_free_pid
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check
+		SET PC, .end
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+:.find_innerl
+	IFE [C], A ; found
+		SET PC, .found
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+:.find_inner_re
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.found
+	SET PUSH, A
+	SET A, C
+	JSR _mem_free_memory.recursion
+	SET A, POP
+	SET PC, .find_inner_re
+:.end
+	SET A, C
+	SET PC, POP
+
+
 :_mem_buddy_sizes
 	dat 0x4
 :_mem_buddy_sizes_plus_one ; some assemblers don't support "[label+literal+register]"
