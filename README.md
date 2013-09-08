@@ -10,7 +10,8 @@ When finished, it will have a shell, multitasking, modular drivers and a working
   * ![partially][partially] Multitasker
   * ![partially][partially] Filesystem
   * ![broken][broken] Drivers
-  * ![broken][broken] Binary loading 
+  * ![broken][broken] Binary loading
+* ![partially][partially] Shell
 * ![broken][broken] Usermode applications
 
 ![done][done] finished
