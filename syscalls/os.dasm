@@ -9,6 +9,10 @@
 ; shuts the system down (kills all processes and halts)
 :_os_shutdown
 	; kill all processes
-	; close all files
-	; infinite loop (wait for poweroff)
+:.loop
+	SET A, [_tasking_current_pid]
+	JSR _proc_kill
+	IFN A, 0
+		SET PC, .loop
+	SUB PC, 1 ; infinite loop (wait for poweroff)
 	SET PC, POP
