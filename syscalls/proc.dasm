@@ -2,6 +2,7 @@
 ; terminates the current (calling) process
 :_proc_exit
 	SET PEEK, [_tasking_current_pid] ; Current Process ID
+	IAQ 0 ; disable interrupt queueing
 	SET PC, _proc_kill
 
 ; PROC_GETID (0xf011)
@@ -19,6 +20,7 @@
 	; set A to 0 in child register entries
 	ADD SP, 1
 	; A: Child Pid
+	IAQ 0 ; disable interrupt queueing
 	SET PC, POP
 
 ; PROC_KILL (0xf013)
@@ -36,7 +38,7 @@
 		SET PC, .loop
 	SET [X+1], [Y+1] ; Y is the one to delete, so set the parent's successor to [Y+1]
 	SET [_tasking_current_pid], [Y] ; set this so we can just
-	SET [_tasking_current_proc], Y ; load
+	SET [_tasking_current_task], Y ; load
 	SET A, Y ; free the task info
 	JSR _mem_alloc_memory
 	SET PUSH, 0 ; push 0 as the EX register... we're losing this one :/
@@ -49,6 +51,7 @@
 	; dis-own memory at A
 	; add entry in process table
 	SET A, 0 ; new pid
+	IAQ 0 ; disable interrupt queueing
 	SET PC, POP
 
 ; PROC_SKIP (0xf015)

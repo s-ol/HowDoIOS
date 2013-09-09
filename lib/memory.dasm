@@ -310,7 +310,7 @@
 :.found
 	SET PUSH, A
 	SET A, C
-	JSR _mem_free_memory.recursion
+	JSR _mem_free_memory+3 ; can't reference sublabels -.-'
 	SET A, POP
 	SET PC, .find_inner_re
 :.end

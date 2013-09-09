@@ -22,7 +22,7 @@
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
 	SET [A+1], A    ; task list is cyclic
-	SET [A+0xa], _empty_task  ; PC = ???
+	SET [A+0xa], _os_info_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A ; backup the task info
@@ -42,11 +42,37 @@
 	SUB PC, 1
 
 dat "EMPTY"
-:_empty_task
+:_os_info_task
+	SET A, 0x183
+	INT [mem_alloc]
+	
+	SET X, A
+	
+	SET A, 0 ; map screen
+	SET B, X ; to X
+	HWI 0
+	
+	INT [os_version] ; A = os version
+	SET C, 0
+:.loop
+	SET B, A
+	SHL B, C ; move to the right
+	AND B, 0xf000 ; only leftmost 4 bits
+	SHR B, 12
+	ADD B, 0x30 ; num -> ascii
+	BOR B, 0xf000 ; format
+	SET [X], B
+	ADD X, 1 ; move to next pos
+	IFE C, 4 ; leave a spot for the point
+		ADD X, 1
+	ADD C, 4 ; next one please!
+	IFN C, 0x10
+		SET PC, .loop
+	SET [X-3], 0xf02e ; put point inbetween
 	SUB PC, 1
 
-.include 'tasking.dasm'
-.include 'handler.dasm'
+#include 'api.dasm'
+#include 'handler.dasm'
 ;.include lib/hwenum.dasm
 ;.include lib/memutils.dasm
 ;.include lib/screenutils.dasm
