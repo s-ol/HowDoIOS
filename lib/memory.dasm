@@ -127,7 +127,7 @@
 :_mem_free_memory
 	JSR _mem_find_buddy
 	SET [A], 0 ; pid = 0 / free!
-:.recursion :_mem_free_memory_recursion
+:.recursion
 	SET PUSH, A
 	SET C, [A+1]
 	SUB C, _mem_arena
@@ -310,7 +310,7 @@
 :.found
 	SET PUSH, A
 	SET A, C
-	JSR _mem_free_memory_recursion
+	JSR _mem_free_memory+3 ; can't reference sublabels -.-'
 	SET A, POP
 	SET PC, .find_inner_re
 :.end
