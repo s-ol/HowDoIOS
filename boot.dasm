@@ -122,6 +122,3 @@ dat "SCR"
 
 #include 'api.dasm'
 #include 'handler.dasm'
-;.include lib/hwenum.dasm
-;.include lib/memutils.dasm
-;.include lib/screenutils.dasm
