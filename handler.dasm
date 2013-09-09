@@ -3,7 +3,7 @@
 	IFE A, 0xffff ; clock / next slice
 		SET PC, _tasking_next_slice
 
-	IFG A, 0xf000 ; definiteley a syscall, we can modify A, B and C registers
+	IFG A, 0x0fff ; definiteley a syscall, we can modify A, B and C registers
 		SET PC, _interrupt_handle_syscall
 	
 	SET PUSH, A
@@ -41,9 +41,15 @@
 	RFI 0
 	
 :.call
-	XOR B, [SP] ; swap B (routine)...
-	XOR [SP], B ; ...and [SP] (parameter B)
-	XOR B, [SP] 
+	SET A, POP
+	SET EX, POP
+	; ADD SP, 2
+	SET PC, [B+1]
+	
+	SET B, [B+1]
+	XOR B, PEEK ; swap B (routine)...
+	XOR PEEK, B ; ...and [SP] (parameter B)
+	XOR B, PEEK 
 	IFE PEEK, _tasking_next_slice
 		SET PC, POP ; leave EX on the stack for _tasking_next_slice
 	XOR [SP], [SP+1] ; swap [SP] (routine)...
@@ -98,10 +104,11 @@
 	dat 0xf061, _mem_free
 :_api_rountines_end
 
-#include "syscalls/hw.dasm"
-#include "syscalls/io.dasm"
-#include "syscalls/mem.dasm"
-#include "syscalls/msg.dasm"
-#include "syscalls/os.dasm"
-#include "syscalls/proc.dasm"
-#include "syscalls/utils.dasm"
+#include 'syscalls/hw.dasm'
+#include 'syscalls/io.dasm'
+#include 'syscalls/mem.dasm'
+#include 'syscalls/msg.dasm'
+#include 'syscalls/os.dasm'
+#include 'syscalls/proc.dasm'
+#include 'syscalls/utils.dasm'
+#include 'tasking.dasm'
