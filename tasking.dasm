@@ -16,8 +16,7 @@
 	SET A, [A+1] ; A is next task's info
 	SET [_tasking_current_pid], [A]
 	SET [_tasking_current_task], A
-	
-	SET A, [A+1]
+
 :_tasking_load_only
 	SET B,    [A+0x3] ; restore B
 	SET C,    [A+0x4] ; restore C
