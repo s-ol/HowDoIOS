@@ -9,6 +9,7 @@ When finished, it will have a shell, multitasking, modular drivers and a working
   * ![done][done] Memory Manager
   * ![partially][partially] Multitasker
   * ![partially][partially] Filesystem
+  * ![partially][partially] Interrupt Handler / API
   * ![broken][broken] Drivers
   * ![broken][broken] Binary loading
 * ![partially][partially] Shell
