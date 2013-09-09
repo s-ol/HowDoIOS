@@ -7,25 +7,60 @@
 	IAS _interrupt_handler
 	
 	; enumerate hardware
-	; set cycle_slice interrupt (0xffff) on clock
+	HWN Z
+:.hardware_loop
+	SUB Z, 1
+	HWQ Z
+	IFE A, 0xb402
+		IFE B, 0x12d0
+			SET PC, .hardware_clock
+	IFE Z, 0
+		SET PC, .hardware_done
+	SET PC, .hardware_loop
+:.hardware_clock
+	IAQ 1 ; turn on interrupt queueing so our setup doesn't get disrupted
+		  ; _tasking_next_slice will disable it again later on, so we don't need to care about that
+	SET A, 2
+	SET B, 0xffff
+	HWI Z ; set cycle_slice interrupt (0xffff) on clock
 	
+	SET A, 0
+	SET B, 1
+	HWI Z ; set clock rate to 60Hz (maximum)  Do it this late to prevent task switces before we are done here
+:.hardware_done
+
 	; launch first task
-	SET A, 0x16 ; process info = 16 words
+	SET A, 0x10 ; process info = 16 words
 	SET B, 0xffff ; proc id
 	JSR _mem_alloc_memory
 	IFE A, 0 ; failed to allocate memory
 		SET PC, .error
-	SET [_tasking_num_tasks], 1
+	SET [_tasking_num_tasks], 2
 	SET [_tasking_current_pid], 0xffff
 	SET [_tasking_current_task], A
 	
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
-	SET [A+1], A    ; task list is cyclic
 	SET [A+0xa], _os_info_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A ; backup the task info
+	
+	; launch second task
+	SET A, 0x10 ; process info = 16 words
+	SET B, 0xfffe ; proc id
+	JSR _mem_alloc_memory
+	IFE A, 0 ; failed to allocate memory
+		SET PC, .error
+	
+	; set the registers, assume everything else is zero
+	SET [A], 0xfffe ; pid
+	SET [A+1], X    ; task list is cyclic
+	SET [A+0xa], other_task  ; PC = ???
+	SET [A+0xe], 1  ; OS flag
+	
+	SET Y, A ; backup the task info
+	SET [X+1], Y ; link first to second
 	
 	SET A, 0x40 ; 64 words of stack is enough... hopefully
 	SET B, 0xffff
@@ -37,16 +72,16 @@
 	
 	SET A, X
 	SET PC, _tasking_load_only ; jump straight to the loading
-		
+
 :.error
 	SUB PC, 1
 
-dat "EMPTY"
 :_os_info_task
 	SET A, 0x183
 	INT [mem_alloc]
 	
 	SET X, A
+	SET [scr], X
 	
 	SET A, 0 ; map screen
 	SET B, X ; to X
@@ -70,6 +105,20 @@ dat "EMPTY"
 		SET PC, .loop
 	SET [X-3], 0xf02e ; put point inbetween
 	SUB PC, 1
+
+:other_task
+	ADD Z, 1
+	SET C, Z
+	AND C, 0x7f
+	BOR C, 0xf000
+	SET B, [scr]
+	SET [B+10], C
+	IFG Z, 0x80
+		SET Z, 41
+	SET PC, other_task
+
+dat "SCR"
+:scr dat 0
 
 #include 'api.dasm'
 #include 'handler.dasm'
