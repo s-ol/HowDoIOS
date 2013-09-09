@@ -43,10 +43,9 @@
 	RFI 0
 	
 :.call
-	SET A, POP
-	SET EX, POP
-	; ADD SP, 2
-	SET PC, [B+1]
+	; SET A, POP
+	; SET EX, POP
+	; SET PC, [B+1]
 	
 	SET B, [B+1]
 	XOR B, PEEK ; swap B (routine)...
