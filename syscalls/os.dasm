@@ -3,6 +3,7 @@
 :_os_version
 	SET A, POP ; pop the A that is to be overridden
 	SET A, 0x0100 ; 1.0
+	IAQ 0 ; disable interrupt queueing
 	SET PC, POP ; RFI would restore the old A
 	
 ; OS_SHUTDOWN (0xf001)
@@ -15,4 +16,3 @@
 	IFN A, 0
 		SET PC, .loop
 	SUB PC, 1 ; infinite loop (wait for poweroff)
-	SET PC, POP

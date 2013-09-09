@@ -31,6 +31,7 @@
 	SET EX,   [A+0xc] ; restore EX
 	SET A,    [A+0x2] ; restore A
 	
+	IAQ 0 ; disable interrupt queueing
 	SET PC, POP       ; restore PC
 
 :_tasking_num_tasks		dat 0 ; num tasks
