@@ -1,3 +1,9 @@
+; msg.dasm: inter-process communication syscalls
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 ; MSG_POLL (0xf050)
 ; polls a message from the queue into memory at A, returns 1 on success, 0 if no new message
 :_msg_poll
