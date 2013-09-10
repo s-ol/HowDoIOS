@@ -5,9 +5,10 @@
 
 :_main
 	IAS _interrupt_handler
+	IAQ 1 ; turn on interrupt queueing so our setup doesn't get disrupted
+	; _tasking_next_slice will disable it again later on, so we don't need to care about that
 	
-	; enumerate hardware
-	HWN Z
+	HWN Z ; enumerate hardware
 :.hardware_loop
 	SUB Z, 1
 	HWQ Z
@@ -18,8 +19,6 @@
 		SET PC, .hardware_done
 	SET PC, .hardware_loop
 :.hardware_clock
-	IAQ 1 ; turn on interrupt queueing so our setup doesn't get disrupted
-		  ; _tasking_next_slice will disable it again later on, so we don't need to care about that
 	SET A, 2
 	SET B, 0xffff
 	HWI Z ; set cycle_slice interrupt (0xffff) on clock
@@ -28,7 +27,6 @@
 	SET B, 1
 	HWI Z ; set clock rate to 60Hz (maximum)  Do it this late to prevent task switces before we are done here
 :.hardware_done
-
 	; launch first task
 	SET A, 0x10 ; process info = 16 words
 	SET B, 0xffff ; proc id
@@ -42,7 +40,7 @@
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
 	SET [A+1], A ; task list is cyclic
-	SET [A+0xa], _os_info_task  ; PC = ???
+	SET [A+0xa], _floppy_load_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A ; backup the task info
@@ -61,7 +59,7 @@
 :.error
 	SUB PC, 1
 
-:_os_info_task
+:_floppy_load_task ; make sure 0 is a lem1802 and 2 are floppy drive. assemble utils/appload_test.dasm for a demo
 	SET A, 0x183
 	INT [mem_alloc]
 	
@@ -71,24 +69,31 @@
 	SET B, X ; to X
 	HWI 0
 	
-	INT [os_version] ; A = os version
-	SET C, 0
-:.loop
-	SET B, A
-	SHL B, C ; move to the right
-	AND B, 0xf000 ; only leftmost 4 bits
-	SHR B, 12
-	ADD B, 0x30 ; num -> ascii
-	BOR B, 0xf000 ; format
-	SET [X], B
-	ADD X, 1 ; move to next pos
-	IFE C, 4 ; leave a spot for the point
-		ADD X, 1
-	ADD C, 4 ; next one please!
-	IFN C, 0x10
-		SET PC, .loop
-	SET [X-3], 0xf02e ; put point inbetween
+	JSR .wait_floppy
+	
+	SET A, 0x200 ; floppy sector size
+	INT [mem_alloc]
+	
+	SET Y, A ; to memory at a
+	SET A, 2 ; read
+	SET X, 0 ; from sector 0
+	HWI 2 ; go!
+	
+	JSR .wait_floppy
+	; now make this a new task
+	SET A, Y
+	SET B, [A] ; first word is size of code
+	ADD A, 1 ; so the code starts at A+1
+	INT [proc_exec]
+	
 	SUB PC, 1
+
+:.wait_floppy
+	SET A, 0
+	HWI 2 ; poll floppy
+	IFN B, 0x1 ; STATE_READY
+		SET PC, .wait_floppy
+	SET PC, POP
 
 #include 'api.dasm'
 #include 'handler.dasm'

@@ -1,0 +1,15 @@
+; assemble to a floppy and plug it in
+dat 0x10 ; code size
+:loop
+	SET A, 0x183
+	INT 0xf060 ; MEM_ALLOC
+	
+	SET X, A
+	
+	SET A, 0 ; map screen
+	SET B, X ; to X
+	HWI 0
+	
+	SET [X], 0xf041
+	
+	SUB PC, 1
