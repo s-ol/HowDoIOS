@@ -27,6 +27,8 @@
 ; terminates process with pid in A
 :_proc_kill
 	SET A, POP
+	SET PUSH, X
+	SET PUSH, Y
 	JSR _mem_free_pid ; free process' dynamically allocated memory
 	; TODO: close all owned files
 	; remove from multitasking list
@@ -39,8 +41,11 @@
 	SET [X+1], [Y+1] ; Y is the one to delete, so set the parent's successor to [Y+1]
 	SET [_tasking_current_pid], [Y] ; set this so we can just
 	SET [_tasking_current_task], Y ; load
+	SUB [_tasking_num_tasks], 1
 	SET A, Y ; free the task info
 	JSR _mem_alloc_memory
+	SET Y, POP
+	SET X, POP
 	SET PUSH, 0 ; push 0 as the EX register... we're losing this one :/
 	SET PC, _tasking_load_only ; load the next proc's registers
 
@@ -48,9 +53,48 @@
 ; creates a new process from the memory between A and B, returns pid in A
 :_proc_exec
 	SET A, POP
-	; add entry in process table
-	SET A, 0 ; new pid
+	SET PUSH, X
+	SET PUSH, Y
+	SET PUSH, A
+	
+	SET Y, 0xf000 ; new pid
+	
+	ADD [_tasking_num_tasks], 1
+	SET A, 0x10 ; process info = 16 words
+	SET B, Y ; pid
+	JSR _mem_alloc_memory
+	
+	; set the registers
+	SET [A], B ; pid
+	SET C, [_tasking_current_task]
+	SET [A+1], [C+1]
+	SET [C+1], A ; put the new task between this one and the next
+	SET [A+0x2], 0
+	SET [A+0x3], 0
+	SET [A+0x4], 0
+	SET [A+0x5], 0
+	SET [A+0x6], 0
+	SET [A+0x7], 0
+	SET [A+0x8], 0
+	SET [A+0x9], 0
+	SET [A+0xa], POP  ; PC = A
+	SET [A+0xc], 0
+	SET [A+0xd], 0
+	SET [A+0xe], 0  ; flags
+	SET [A+0xf], 0  ; flags
+	
+	SET X, A ; backup the task info
+	
+	SET A, 0x40 ; 64 words of stack is enough... hopefully
+	SET B, Y ; pid
+	JSR _mem_alloc_memory
+	ADD A, 0x3f ; go to the end of the stack memory
+	SET [X+0xb], A ; set SP
+	
+	SET A, Y ; new pid
 	IAQ 0 ; disable interrupt queueing
+	SET Y, POP
+	SET X, POP
 	SET PC, POP
 
 ; PROC_SKIP (0xf015)
