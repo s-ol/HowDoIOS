@@ -87,7 +87,7 @@
 
 :_os_info_task
 	SET A, 0x183
-	INT [mem_alloc]
+	INT MEM_ALLOC
 	
 	SET X, A
 	SET [scr], X
@@ -96,7 +96,7 @@
 	SET B, X ; to X
 	HWI 0
 	
-	INT [os_version] ; A = os version
+	INT OS_VERSION ; A = os version
 	SET C, 0
 :.loop
 	SET B, A
