@@ -6,7 +6,16 @@
 :_main
 	IAS _interrupt_handler
 	
-	; enumerate hardware
+	; TODO: hardware enumeration like this:
+	; loop through all hardware
+		; if clock && no system clock yet
+			; system clock = clock
+			; setup interrupts
+		; elseif driver present
+			; init driver instance
+		; else
+			; store in list of unknown hardware
+	; this can't be done until drivers are done, so for now this will have to do:
 	HWN Z
 :.hardware_loop
 	SUB Z, 1
