@@ -7,10 +7,30 @@
 	IAS _interrupt_handler
 	
 	; enumerate hardware
-	; set cycle_slice interrupt (0xffff) on clock
+	HWN Z
+:.hardware_loop
+	SUB Z, 1
+	HWQ Z
+	IFE A, 0xb402
+		IFE B, 0x12d0
+			SET PC, .hardware_clock
+	IFE Z, 0
+		SET PC, .hardware_done
+	SET PC, .hardware_loop
+:.hardware_clock
+	IAQ 1 ; turn on interrupt queueing so our setup doesn't get disrupted
+		  ; _tasking_next_slice will disable it again later on, so we don't need to care about that
+	SET A, 2
+	SET B, 0xffff
+	HWI Z ; set cycle_slice interrupt (0xffff) on clock
 	
+	SET A, 0
+	SET B, 1
+	HWI Z ; set clock rate to 60Hz (maximum)  Do it this late to prevent task switces before we are done here
+:.hardware_done
+
 	; launch first task
-	SET A, 0x16 ; process info = 16 words
+	SET A, 0x10 ; process info = 16 words
 	SET B, 0xffff ; proc id
 	JSR _mem_alloc_memory
 	IFE A, 0 ; failed to allocate memory
@@ -21,7 +41,7 @@
 	
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
-	SET [A+1], A    ; task list is cyclic
+	SET [A+1], A ; task list is cyclic
 	SET [A+0xa], _os_info_task  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
@@ -37,11 +57,10 @@
 	
 	SET A, X
 	SET PC, _tasking_load_only ; jump straight to the loading
-		
+
 :.error
 	SUB PC, 1
 
-dat "EMPTY"
 :_os_info_task
 	SET A, 0x183
 	INT [mem_alloc]
@@ -73,6 +92,3 @@ dat "EMPTY"
 
 #include 'api.dasm'
 #include 'handler.dasm'
-;.include lib/hwenum.dasm
-;.include lib/memutils.dasm
-;.include lib/screenutils.dasm
