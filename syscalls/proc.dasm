@@ -45,10 +45,9 @@
 	SET PC, _tasking_load_only ; load the next proc's registers
 
 ; PROC_EXEC (0xf014)
-; creates a new process from the memory at A, returns pid in A
+; creates a new process from the memory between A and B, returns pid in A
 :_proc_exec
 	SET A, POP
-	; dis-own memory at A
 	; add entry in process table
 	SET A, 0 ; new pid
 	IAQ 0 ; disable interrupt queueing
