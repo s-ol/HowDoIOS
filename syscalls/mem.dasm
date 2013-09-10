@@ -1,3 +1,9 @@
+; mem.dasm: memory manager and related syscalls
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 ; MEM_ALLOC (0xf060)
 ; allocates A words of memory for the current process, returns 0 or the address
 :_mem_alloc
@@ -15,4 +21,377 @@
 	IAQ 0 ; disable interrupt queueing
 	SET PC, POP
 	
-.include 'lib/memory.dasm'
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_alloc_memory ("MALLOC")
+;; Arguments: A - size
+;;			  B - pid
+;; Returns:   A - pointer to memory / 0 on failure
+:_mem_alloc_memory
+	SET PUSH, I
+	SET PUSH, B ; pid
+	
+	SET B, 0
+:.sizel
+	IFG [_mem_buddy_sizes+B], A
+		SET PC, .sized
+	ADD B, 1
+	SET PC,.sizel
+:.sized
+	SET C, B ; B does now contain the buddy size (2^B > A)
+
+:.findfreel
+	IFE [_mem_core_buddies+C], 0
+		SET PC, .inc_size
+	SET I, [_mem_core_buddies+C]
+:.inner_freel
+	IFE [I], 0 ; found a free one
+		SET PC, .inner_freed
+	IFE [I+2], 0 ; end of this list
+		SET PC, .inc_size
+	SET I, [I+2]
+	SET PC, .inner_freel
+:.inc_size
+	ADD C, 1
+	IFN C, [_mem_arena_info+4]
+		SET PC, .findfreel
+	SET A, POP ; no free memory
+	SET A, 0
+	SET PC, .return
+	
+:.inner_freed ; C - buddy size index, I - buddy descriptor addr
+	IFE C, B ; buddy is ready
+		SET PC, .alloc_ret
+	JSR .split ; splits buddy I, I = buddy #1 descriptor, decrements C
+	SET PC, .inner_freed
+	
+:.alloc_ret
+	SET [I], POP ; pid
+	SET A, [I+1] ; I+1 - buddy loc
+:.return
+	SET I, POP
+	SET PC, POP
+	
+:.split
+	SET PUSH, X
+	SET PUSH, Y
+	SET Y, _mem_core_buddies
+	ADD Y, C
+	SET X, Y
+	SUB X, 2
+	IFE [Y], I
+		SET PC, .split_find_prevd
+	SET Y, [Y]
+:.split_find_prevl
+	IFE Y, I
+		SET PC, .split_find_prevd
+	SET X, Y
+	SET Y, [Y+2] ; next in chain
+	SET PC, .split_find_prevl
+:.split_find_prevd
+	SUB C, 1
+	SET [X+2], [I+2] ; break out split buddy (X - prev descriptor)
+	SET Y, _mem_kernel_memory_map-1
+:.split_meml
+	ADD Y, 1
+	IFE [Y], 0xffff ; all taken
+		SET PC, .split_meml
+	SET X, 1
+:.split_mem_bl
+	IFC [Y], X ; if (B (1111110) & A (0000001) ) == 0
+		SET PC, .split_memd
+	SHL X, 1
+	SET PC, .split_mem_bl
+:.split_memd
+	BOR [Y], X ; set as taken
+	SUB Y, _mem_kernel_memory_map
+:.split_mem_sl
+	IFE X, 1
+		SET PC, .split_mem_sd
+	SHR X, 1
+	ADD Y, 1
+	SET PC, .split_mem_sl
+:.split_mem_sd
+	MUL Y, 3
+	ADD Y, _mem_kernel_memory ; first free descriptor
+	SET [Y], 0
+	SET [Y+1], [I+1]
+	ADD [Y+1], [_mem_buddy_sizes+C]
+	SET [Y+2], 0
+	SET [I], 0	 ; make new block free, location is still correct
+	SET [I+2], Y ; set successor
+	
+	;ADD [_mem_arena_info+2], 3
+	SET Y, _mem_core_buddies
+	ADD Y, C
+	IFN [Y], 0
+		SET PC, .split_findl
+	SUB Y, 2
+	SET PC, .split_done
+:.split_findl
+	IFE [Y+2], 0
+		SET PC, .split_done
+	SET Y, [Y+2]
+	SET PC, .split_findl
+:.split_done
+	SET [Y+2], I ; add desc #1 and #2 to the list
+	SET X, POP
+	SET Y, POP
+	SET PC, POP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_free_memory ("FREE")
+;; Arguments: A - pointer to memory
+;; Returns:   A - 0 on failure
+:_mem_free_memory
+	JSR _mem_find_buddy
+	SET [A], 0 ; pid = 0 / free!
+:.recursion
+	SET PUSH, A
+	SET C, [A+1]
+	SUB C, _mem_arena
+	MOD C, [_mem_buddy_sizes_plus_one+B] ; mod next biggest buddy size
+	
+	SET A, [A+1]
+	IFE C, 0
+		SET PC, .even
+	SUB A, C ; "uneven cut" -> buddy is at [A+1] - C
+	SET PC, .check_merge
+:.even
+	ADD A, [_mem_buddy_sizes+B] ; "even cut" -> buddy is the following one ([A+1]+[budsize+B])
+	SET PUSH, A ; push the first one
+	SEt A, C ; make A the 2nd one
+:.check_merge
+	JSR _mem_find_buddy
+	IFN [A], 0 ; buddy is taken, we can exit
+		SET PC, .pop_and_exit
+	
+	SET C, POP ; pop the first one (parent addr)
+	
+	XOR A, C ; swap A and C
+	XOR C, A
+	XOR A, C ; (A does now contain the first addr)
+	
+	SET PUSH, A
+	SET PUSH, B
+	SET PUSH, C
+	JSR _mem_unlink_info
+	SET C, POP
+	SET B, POP
+	SET A, POP
+	
+	XOR A, B ; swap A and B
+	XOR B, A ; A = size index
+	XOR A, B ; B = info loc
+	
+	SET PUSH, A
+	SET PUSH, C
+	JSR _mem_insert_info
+	SET C, POP
+	SET A, POP
+	
+	XOR A, C ; swap A and C
+	XOR C, A
+	XOR A, C ; (A does now contain the disposable block)
+	SET PUSH, C
+	JSR _mem_delete_info
+	SET C, POP
+	
+	SET A, [C+1]
+	SET PC, .recursion ; now merge parent block
+
+:.pop_and_exit
+	SET B, POP
+	SET PC, POP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_insert_info
+;; Arguments: A - buddy size index
+;;            B - buddy info location ([B+2] should be 0)
+;; Returns:   -
+:_mem_insert_info
+	SET A, [_mem_core_buddies+A]
+	IFN [A], 0
+		SET PC, .loop
+	SET [A], B
+	SET PC, POP
+:.loop
+	SET A, [A]
+	IFN [A+2], 0
+		SET PC, .loop
+	SET [A+2], B
+	SET PC, POP
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_delete_info
+;; Arguments: A - pointer to buddy info
+;; Returns:   -
+:_mem_delete_info
+	SET [A], 0
+	SET [A+1], 0
+	SET [A+2], 0 ; set to 0, 0, 0 for safety
+	SET B, A
+	SUB B, _mem_kernel_memory
+	DIV B, 3
+	SET C, B
+	MOD C, 16
+	SUB B, C ; the bit is in [_mem_kernel_memory_map+B]
+	SET A, 1
+	SHL A, C ; A = 0xb0000010000
+	XOR A, 0xffff ; is now 0b1111101111 (or like that)
+	AND [_mem_kernel_memory_map+B], A
+	SET PC, POP
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_unlink_info
+;; Arguments: A - pointer to buddy info
+;; Returns:   -
+:_mem_unlink_info
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check??
+		SET PC, POP
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+	IFE A, C
+		SET PC, .first
+:.find_innerl
+	IFE [C+2], A ; found
+		SET PC, .end
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.end
+	SET A, C
+	SET PC, POP
+	SET [C+2], [A+2]
+	SET [A+2], 0
+	SET PC, POP
+:.first
+	SET [_mem_core_buddies+B], [A+2]
+	SET [A+2], 0
+	SET PC, POP
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_find_buddy
+;; Arguments: A - pointer to memory
+;; Returns:   A - pointer to buddy info / 0 on failure
+;;            B - buddy size offset
+:_mem_find_buddy
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check
+		SET PC, .error
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+:.find_innerl
+	IFE [C+1], A ; found
+		SET PC, .end
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.end
+	SET A, C
+	SET PC, POP
+	
+:.error
+	SET A, 0
+	SET PC, POP
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; _mem_free_pid
+;; Arguments: A - pid of process whose memory should be freed
+;; Returns:   -
+:_mem_free_pid
+	SET B, 0xffff
+:.findl
+	ADD B, 1
+	IFE B, [_mem_arena_info+4] ; no more blocks to check
+		SET PC, .end
+	IFE [_mem_core_buddies+B], 0
+		SET PC, .findl
+	SET C, [_mem_core_buddies+B]
+:.find_innerl
+	IFE [C], A ; found
+		SET PC, .found
+	IFE [C+2], 0 ; no more of this size
+		SET PC, .findl
+:.find_inner_re
+	SET C, [C+2]
+	SET PC, .find_innerl
+:.found
+	SET PUSH, A
+	SET A, C
+	JSR _mem_free_memory+3 ; can't reference sublabels -.-'
+	SET A, POP
+	SET PC, .find_inner_re
+:.end
+	SET A, C
+	SET PC, POP
+
+
+:_mem_buddy_sizes
+	dat 0x4
+:_mem_buddy_sizes_plus_one ; some assemblers don't support "[label+literal+register]"
+	dat 0x8
+	dat 0x10
+	dat 0x20
+	dat 0x40
+	dat 0x80
+	dat 0x100
+	dat 0x200
+	dat 0x400
+	dat 0x800
+	dat 0x1000
+	dat 0x2000
+
+; dat "CORE BUDDIES"
+:_mem_core_buddies	dat 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _mem_kernel_memory
+	
+; dat "ARENA INFO"
+:_mem_arena_info
+	dat _mem_arena, 0x2000
+	dat _mem_kernel_memory+3, 0x7fd
+	dat 13
+
+dat "MEM MAP"
+:_mem_kernel_memory_map
+	dat 0x1
+	.reserve 0x52 ; 0x530 bits needed = 0x53 words, one is set already
+
+dat "KERNEL MEM"
+:_mem_kernel_memory
+	dat 0, _mem_arena, 0 ; 2^13 buddy, unallocated
+	.reserve 0xf8d ; 0xf8d + 0x3 = 0xf90, 0xf90 / 3 words = 0x530
+; 0x0	 - 0x9	  (0x10 / 2^4) --
+; 0x10	 - 0x19	  (0x10 / 2^4)  | 0x40 words
+; 0x20	 - 0x39	  (0x20 / 2^5) --
+; 0x40	 - 0x79	  (0x40 / 2^6)
+; 0x80	 - 0xff	  (0x80 / 2^7)
+; 0x100	 - 0x1ff  (0x100 / 2^8)
+; 0x200	 - 0x3ff  (0x200 / 2^9)
+; 0x400	 - 0x7ff  (0x400 / 2^10)
+; 0x800	 - 0xfff  (0x800 / 2^11)
+; 0x1000 - 0x1fff (0x1000 / 2^12)
+
+; dat "ARENA"
+:_mem_arena
+	.reserve 0x2000
+
+;										  ----
+;	dat 1, _mem_arena, _2, 0		; 2^4    |
+;:_2dat 1, _mem_arena + 0x10, 0, 0	; 2^4    |
+;	dat 1, _mem_arena + 0x20, 0, 0	; 2^5    |
+;	dat 0, _mem_arena + 0x40, 0, 0	; 2^6    |
+;	dat 0, _mem_arena + 0x80, 0, 0	; 2^7    |
+;	dat 0, _mem_arena + 0x100, 0, 0	; 2^8    |
+;	dat 0, _mem_arena + 0x200, 0, 0	; 2^9    |
+;	dat 0, _mem_arena + 0x400, 0, 0	; 2^10   |
+;	dat 0, _mem_arena + 0x800, 0, 0	; 2^11   |
+;	dat 0, _mem_arena + 0x1000, 0, 0; 2^12 ---- 0x40 words
