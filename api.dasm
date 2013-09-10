@@ -9,12 +9,21 @@
 #define OS_SHUTDOWN			0xf001	; shuts the system down (kills all processes and halts)
 
 ; PROC
+<<<<<<< HEAD
 #define PROC_EXIT			0xf010	; terminate the current (calling) process
 #define PROC_GETID			0xf011	; returns pid of the calling process (A)
 #define PROC_FORK			0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
 #define PROC_KILL			0xf013	; terminate process with pid in A
 #define PROC_EXEC			0xf014	; creates a new process from the memory at A, returns pid in A
 #define PROC_SKIP			0xf015	; skips current process / slice (give other processes more time)
+=======
+:proc_exit			dat 0xf010	; terminate the current (calling) process
+:proc_getid			dat 0xf011	; returns pid of the calling process (A)
+:proc_fork			dat 0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
+:proc_kill			dat 0xf013	; terminate process with pid in A
+:proc_exec			dat 0xf014	; creates a new process from the memory between A and B, returns pid in A
+:proc_skip			dat 0xf015	; skips current process / slice (give other processes more time)
+>>>>>>> aa47
 
 ; IO
 #define PUTS				0xf020	; writes a string to the console (if connected)
