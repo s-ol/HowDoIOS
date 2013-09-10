@@ -1,3 +1,9 @@
+; proc.dasm: process management syscalls
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 ; PROC_EXIT (0xf010)
 ; terminates the current (calling) process
 :_proc_exit

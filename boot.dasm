@@ -1,7 +1,8 @@
-; *************************
-; Project: S0lllOS
-; File: boot.dasm
-; *************************
+; boot.dasm: main entry point and bootstrap
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
 
 :_main
 	IAS _interrupt_handler

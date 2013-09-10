@@ -1,7 +1,8 @@
-; *************************
-; Project: S0lllOS
-; File: api.dasm
-; *************************
+; api.dasm: syscall defines for user applications
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
 
 ; OS
 #define OS_VERSION			0xf000	; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor

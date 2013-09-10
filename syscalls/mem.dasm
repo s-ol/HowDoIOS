@@ -1,3 +1,9 @@
+; mem.dasm: memory manager and related syscalls
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 ; MEM_ALLOC (0xf060)
 ; allocates A words of memory for the current process, returns 0 or the address
 :_mem_alloc
