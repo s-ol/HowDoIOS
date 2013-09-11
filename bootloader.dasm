@@ -1,0 +1,131 @@
+; bootloader.dasm: hardware enumeration and driver distribution
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+:_bootloader
+	HWN Z
+:.hardware_loop
+	SUB Z, 1
+	HWQ Z
+	IFE A, 0xf615 ; lem1802
+	 IFE B, 0x7349
+	  IFE [_bootloader_hardware], 0xffff
+		SET [_bootloader_hardware], Z
+	IFE A, 0x7406
+	 IFE B, 0x30cf ; keyboard
+	  IFE [_bootloader_hardware+1], 0xffff
+		SET [_bootloader_hardware+1], Z
+	IFE A, 0x24c5
+	 IFE B, 0x4fd5 ; m35fd
+	  IFE [_bootloader_hardware+2], 0xffff
+		SET [_bootloader_hardware+2], Z
+	IFN Z, 0
+		SET PC, .hardware_loop
+	
+	IFN [_bootloader_hardware], 0xffff
+	 IFN [_bootloader_hardware+1], 0xffff
+	  IFN [_bootloader_hardware+2], 0xffff ; at least one device of each kind
+	  	SET PC, .got_all
+	SUB PC, 1 ; error
+:.got_all
+	SET A, 0x183
+	INT MEM_ALLOC
+	
+	SET I, A ; I = screen
+	
+	SET A, 0 ; map screen
+	SET B, I ; to X
+	HWI [_bootloader_hardware]
+	
+	HWN A
+	MUL A, 2
+	INT MEM_ALLOC ; alloc 2*(num hw)
+	
+	SET J, A ; J = hw list
+	
+	HWN Z
+:.enum_loop
+	SUB Z, 1
+	HWQ Z
+	
+	SET C, Z
+	MUL C, 0x2
+	ADD C, J
+	SET [C], 0
+	SET [C+1], 0
+	
+	SET C, Z
+	MUL C, 0x20
+	ADD C, I
+	SET [C], 0xf030
+	SET [C+1], 0xf078
+	ADD C, 2
+	
+	SET PUSH, A
+	SET PUSH, C
+	SET A, B ; B first
+	SET B, C
+	JSR _print_hex
+	
+	SET B, POP
+	ADD B, 4
+	SET A, POP
+	JSR _print_hex
+	IFN Z, 0
+		SET PC, .enum_loop
+	
+	SUB PC, 1
+	
+	JSR _wait_floppy
+	
+	SET A, 0x200 ; floppy sector size
+	INT MEM_ALLOC
+	
+	SET Y, A ; to memory at a
+	SET A, 2 ; read
+	SET X, 0 ; from sector 0
+	HWI 2 ; go!
+	
+	JSR _wait_floppy
+	; now make this a new task
+	SET A, Y
+	SET B, [A] ; first word is size of code
+	ADD A, 1 ; so the code starts at A+1
+	INT PROC_EXEC
+	
+	SUB PC, 1
+
+:_wait_floppy
+	SET A, 0
+	HWI [_bootloader_hardware+2] ; poll floppy
+	IFN B, 0x1 ; STATE_READY
+		SET PC, _wait_floppy
+	SET PC, POP
+
+:_print_hex
+	SET PUSH, X
+	SET X, B
+	SET C, 0
+:.loop
+	SET B, A
+	SHL B, C ; move to the right
+	AND B, 0xf000 ; only leftmost 4 bits
+	SHR B, 12
+	ADD B, 0x30 ; num -> ascii
+	IFG B, 0x39 ; not a digit
+		ADD B, 8 ; move to alphabet
+	BOR B, 0xf000 ; format
+	SET [X], B
+	ADD X, 1 ; move to next pos
+	ADD C, 4 ; next one please!
+	IFN C, 0x10
+		SET PC, .loop
+	SET X, POP
+	SET PC, POP
+
+:_bootloader_hardware
+	dat 0xffff ; lem1802
+	dat 0xffff ; keyboard
+	dat 0xffff ; floppy

@@ -51,7 +51,7 @@
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
 	SET [A+1], A ; task list is cyclic
-	SET [A+0xa], _floppy_load_task  ; PC = ???
+	SET [A+0xa], _bootloader  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A ; backup the task info
@@ -70,41 +70,6 @@
 :.error
 	SUB PC, 1
 
-:_floppy_load_task ; make sure 0 is a lem1802 and 2 are floppy drive. assemble utils/appload_test.dasm for a demo
-	SET A, 0x183
-	INT MEM_ALLOC
-	
-	SET X, A
-	
-	SET A, 0 ; map screen
-	SET B, X ; to X
-	HWI 0
-	
-	JSR .wait_floppy
-	
-	SET A, 0x200 ; floppy sector size
-	INT MEM_ALLOC
-	
-	SET Y, A ; to memory at a
-	SET A, 2 ; read
-	SET X, 0 ; from sector 0
-	HWI 2 ; go!
-	
-	JSR .wait_floppy
-	; now make this a new task
-	SET A, Y
-	SET B, [A] ; first word is size of code
-	ADD A, 1 ; so the code starts at A+1
-	INT PROC_EXEC
-	
-	SUB PC, 1
-
-:.wait_floppy
-	SET A, 0
-	HWI 2 ; poll floppy
-	IFN B, 0x1 ; STATE_READY
-		SET PC, .wait_floppy
-	SET PC, POP
-
+#include 'bootloader.dasm'
 #include 'api.dasm'
 #include 'handler.dasm'
