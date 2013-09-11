@@ -34,35 +34,43 @@
 ;#macro scr_string( string, cursor ) {
 ;	scr_stringf( string, cursor, 0xf000 )
 ;}
-	
+
+; A = Pointer to string
+; B = Format
+; C = Cursor
+
 :_scr_packed_string
-	SET PUSH, Y
+	SET PUSH, X
+	
 :_scr_packed_string_loop
+	SET X, [A]	; high byte
+	SHR X, 8    ; shift high byte to low one
+	AND X, 0x7f ; clear high
 	
-	SET Y, [J]	; high byte
-	SHR Y, 8    ; shift high byte to low one
-	AND Y, 0x7f ; clear high
-	
-	IFE Y, 0
+	IFE X, 0
 		SET PC, _scr_packed_string_done
 	
-	BOR Y, B    ; apply format
-	SET [I], Y
-	ADD I, 1
+	BOR X, B    ; apply format
+	SET [C], X
+	ADD C, 1
 	
-	SET Y, [J]  ; low byte
-    AND Y, 0x7f ; clear our high byte
+	SET X, [A]  ; low byte
+    AND X, 0x7f ; clear our high byte
   
-    IFE Y, 0
+    IFE X, 0
 		SET PC, _scr_packed_string_done
 		
-	BOR Y, B    ; apply format
-	STI [I], Y  ; increment I and J
+	BOR X, B    ; apply format
+	SET [C], X
+	ADD C, 1
+	
+	ADD A, 1
 	
 	SET PC, _scr_packed_string_loop
 :_scr_packed_string_done
-	SET Y, POP
+	SET X, POP
 	SET PC, POP
+	
 	
 ;#macro scr_packed_stringf( string, cursor, color ) {
 ;	SET PUSH, I

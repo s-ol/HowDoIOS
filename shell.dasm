@@ -8,16 +8,42 @@
 	SET A, 0x180	; allocate 0x180 words for monitor mapping
 	INT MEM_ALLOC
 	
-	SET Z, A		; backup in Z
+	SET X, A		; backup in X
+	SET Y, X		; Y = Cursor
 	
-	SET A, 0		
-	SET B, Z
+	SET A, 0
+	SET B, X
 	HWI 2
 	
-	SET I, Z
-	SET J, _shell_banner
+	SET A, _shell_banner	; print banner and welcome message
 	SET B, 0xa000
+	SET C, Y
 	JSR _scr_packed_string
+	
+	SET A, _shell_welcome
+	SET B, 0xa000
+	JSR _adv_line
+	SET C, Y
+	JSR _scr_packed_string
+	
+	SET A, _shell_welcome
+	SET B, 0xa000
+	JSR _adv_line
+	SET C, Y
+	JSR _scr_packed_string
+	
+	SET A, _shell_welcome
+	SET B, 0xa000
+	JSR _adv_line
+	SET C, Y
+	JSR _scr_packed_string
+	
+:_end
+	SUB PC, 1
+	
+:_adv_line
+	ADD Y, 0x20
+	SET PC, POP
 	
 :_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
 :_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
