@@ -42,7 +42,7 @@
 	; set the registers, assume everything else is zero
 	SET [A], 0xffff ; pid
 	SET [A+1], A ; task list is cyclic
-	SET [A+0xa], _os_info_task  ; PC = ???
+	SET [A+0xa], _shell  ; PC = ???
 	SET [A+0xe], 1  ; OS flag
 	
 	SET X, A ; backup the task info
@@ -63,7 +63,7 @@
 
 :_os_info_task
 	SET A, 0x183
-	INT [mem_alloc]
+	INT MEM_ALLOC
 	
 	SET X, A
 	
@@ -71,7 +71,7 @@
 	SET B, X ; to X
 	HWI 0
 	
-	INT [os_version] ; A = os version
+	INT OS_VERSION ; A = os version
 	SET C, 0
 :.loop
 	SET B, A
@@ -92,3 +92,4 @@
 
 #include 'api.dasm'
 #include 'handler.dasm'
+#include 'shell.dasm'
