@@ -16,7 +16,7 @@
 	SET PC, .loop
 
 ; MEMCPY (0xf031 )
-; copies memory between (including) A and B too memory starting at C
+; copies memory between (including) A and B to memory starting at C
 :_memcpy
 	SET A, POP
 :.loop
