@@ -1,0 +1,95 @@
+; driver_floppy.dasm: standard bootup driver floppy
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; assemble to a floppy and plug it in
+:sector_zero
+dat 4 ; num drivers on this floppy
+; driver info list ([num_drivers] words)
+dat first, second, third, fourth
+
+; driver infos:
+; 		dat code_size,							packed_name
+:first	dat (sector_one_end - sector_one),		0x6465, 0x6661, 0x756c, 0x7400 ; default
+:second	dat (sector_two_end - sector_two),		0x6261, 0x7369, 0x635f, 0x6b65, 0x7962, 0x6f61, 0x7264, 0 ; basic_keyboard
+:third	dat (sector_three_end - sector_three),	0x4d33, 0x3546, 0x445f, 0x302e, 0x3100 ; M35FD_0.1
+:fourth	dat (sector_four_end - sector_four),	0x4c45, 0x4d31, 0x3830, 0x325f, 0x302e, 0x3100 ; LEM1802_0.1
+	:sector_zero_end
+	.origin 0x200
+
+:sector_one ; default
+	dat .init
+	dat .exit
+	dat .interrupt
+	dat .app_call
+:.init
+	SET [.id], A
+	SET PC, POP
+:.exit
+	SET PC, POP
+:.interrupt
+	SET PC, POP
+:.app_call
+	SET PC, POP
+
+:.id dat 0
+	:sector_one_end
+	.origin 0x400
+	
+:sector_two ; basic_keyboard
+	dat .init
+	dat .exit
+	dat .interrupt
+	dat .app_call
+:.init
+	SET [.id], A
+	SET PC, POP
+:.exit
+	SET PC, POP
+:.interrupt
+	SET PC, POP
+:.app_call
+	SET PC, POP
+
+:.id dat 0
+	:sector_two_end
+	.origin 0x600
+	
+:sector_three ; M35FD_0.1
+	dat .init
+	dat .exit
+	dat .interrupt
+	dat .app_call
+:.init
+	SET [.id], A
+	SET PC, POP
+:.exit
+	SET PC, POP
+:.interrupt
+	SET PC, POP
+:.app_call
+	SET PC, POP
+
+:.id dat 0
+	:sector_three_end
+	.origin 0x800
+	
+:sector_four ; LEM1802_0.1
+	dat .init
+	dat .exit
+	dat .interrupt
+	dat .app_call
+:.init
+	SET [.id], A
+	SET PC, POP
+:.exit
+	SET PC, POP
+:.interrupt
+	SET PC, POP
+:.app_call
+	SET PC, POP
+
+:.id dat 0
+	:sector_four_end

@@ -76,8 +76,6 @@
 	IFN Z, 0
 		SET PC, .enum_loop
 	
-	SUB PC, 1
-	
 	JSR _wait_floppy
 	
 	SET A, 0x200 ; floppy sector size
@@ -86,16 +84,92 @@
 	SET Y, A ; to memory at a
 	SET A, 2 ; read
 	SET X, 0 ; from sector 0
-	HWI 2 ; go!
+	HWI [_bootloader_hardware+2] ; go!
 	
 	JSR _wait_floppy
-	; now make this a new task
-	SET A, Y
-	SET B, [A] ; first word is size of code
-	ADD A, 1 ; so the code starts at A+1
-	INT PROC_EXEC
 	
+	SET X, 0
+	SET Z, 1
+	SET PC, .print_driver
+	
+:.key_loop
+	SET A, 1
+	HWI [_bootloader_hardware+1] ; poll keyboard
+	IFE C, 0x80
+		SET PC, .up
+	IFE C, 0x81
+		SET PC, .down
+	IFE C, 0x82
+		SET PC, .left
+	IFE C, 0x83
+		SET PC, .right
+	
+	IFN C, 0x11 ; not return
+		SET PC, .key_loop
+	
+	; load & launch drivers
 	SUB PC, 1
+	
+:.up
+	IFE X, 0
+		SET PC, .key_loop
+	SET C, X
+	SUB X, 1
+	SET PC, .cleanup_driver
+	
+:.down
+	HWN A
+	SUB A, 1
+	IFE X, A
+		SET PC, .key_loop
+	SET C, X
+	ADD X, 1
+:.cleanup_driver
+	MUL C, 0x20
+	ADD C, I
+	ADD C, 0xc
+	SET [C], 0x0000 ; delete <
+	ADD C, 0x13
+	SET [C], 0x0000 ; delete >
+	SET PC, .print_driver
+
+:.left
+	IFE Z, 1
+		SET PC, .key_loop
+	SUB Z, 1
+	SET PC, .print_driver
+	
+:.right
+	IFE Z, [Y]
+		SET PC, .key_loop
+	ADD Z, 1
+:.print_driver
+	SET A, _name_clear
+	SET B, 0xf000
+	SET C, X
+	MUL C, 0x20
+	ADD C, I
+	ADD C, 0xc
+	SET PUSH, C
+	SET PUSH, C
+	JSR _scr_packed_string ; clear
+	
+	SET A, Y
+	ADD A, Z ; pointer to driver info
+	SET A, [A]
+	ADD A, Y
+	ADD A, 1
+	SET B, 0xf000
+	SET C, POP ; restore cursor
+	ADD C, 1
+	JSR _scr_packed_string ; print driver name
+	
+	SET C, POP
+	SET [C], 0xf03c ; print <
+	ADD C, 0x13
+	SET [C], 0xf03e ; print >
+	
+	SET PC, .key_loop
 
 :_wait_floppy
 	SET A, 0
@@ -125,7 +199,42 @@
 	SET X, POP
 	SET PC, POP
 
+:_scr_packed_string
+	SET PUSH, X
+
+:_scr_packed_string_loop
+	SET X, [A]	; high byte
+	SHR X, 8    ; shift high byte to low one
+	AND X, 0x7f ; clear high
+
+	IFE X, 0
+		SET PC, _scr_packed_string_done
+
+	BOR X, B    ; apply format
+	SET [C], X
+	ADD C, 1
+
+	SET X, [A]  ; low byte
+    AND X, 0x7f ; clear our high byte
+  
+    IFE X, 0
+		SET PC, _scr_packed_string_done
+
+	BOR X, B    ; apply format
+	SET [C], X
+	ADD C, 1
+
+	ADD A, 1
+
+	SET PC, _scr_packed_string_loop
+:_scr_packed_string_done
+	SET X, POP
+	SET PC, POP
+
 :_bootloader_hardware
 	dat 0xffff ; lem1802
 	dat 0xffff ; keyboard
 	dat 0xffff ; floppy
+	
+:_name_clear
+	dat 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2000
