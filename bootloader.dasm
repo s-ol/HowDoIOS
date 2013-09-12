@@ -125,6 +125,10 @@
 	SET C, X
 	ADD X, 1
 :.cleanup_driver
+	SET Z, X
+	MUL Z, 2 ; find driver index in driver/pid list
+	ADD Z, J
+	SET Z, [Z]
 	MUL C, 0x20
 	ADD C, I
 	ADD C, 0xc
@@ -134,7 +138,7 @@
 	SET PC, .print_driver
 
 :.left
-	IFE Z, 1
+	IFE Z, 0
 		SET PC, .key_loop
 	SUB Z, 1
 	SET PC, .print_driver
@@ -144,6 +148,10 @@
 		SET PC, .key_loop
 	ADD Z, 1
 :.print_driver
+	SET A, X
+	MUL A, 2 ; find driver index in driver/pid list
+	ADD A, J
+	SET [A], Z
 	SET A, _name_clear
 	SET B, 0xf000
 	SET C, X
@@ -184,12 +192,12 @@
 	SET C, 0
 :.loop
 	SET B, A
-	SHL B, C ; move to the right
+	SHL B, C ; move to the left
 	AND B, 0xf000 ; only leftmost 4 bits
 	SHR B, 12
 	ADD B, 0x30 ; num -> ascii
 	IFG B, 0x39 ; not a digit
-		ADD B, 8 ; move to alphabet
+		ADD B, 7 ; move to alphabet
 	BOR B, 0xf000 ; format
 	SET [X], B
 	ADD X, 1 ; move to next pos
