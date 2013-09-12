@@ -20,11 +20,11 @@
 :_memcpy
 	SET A, POP
 :.loop
-	IFG A, C
+	IFG A, B
 		SET PC, _utils_end
-	SET [A], [B]
+	SET [A], [C]
 	ADD A, 1
-	ADD B, 1
+	ADD C, 1
 	SET PC, .loop
 
 ; STRCMP (0xf032)
