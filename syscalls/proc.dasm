@@ -56,14 +56,25 @@
 	SET PC, _tasking_load_only ; load the next proc's registers
 
 ; PROC_EXEC (0xf014)
-; creates a new process from the memory between A and B, returns pid in A
+; creates a new process from the memory starting at A and with length B, returns pid in A
 :_proc_exec
 	SET A, POP
 	SET PUSH, X
 	SET PUSH, Y
 	SET PUSH, A
-	
+
 	SET Y, 0xf000 ; new pid
+
+	SET A, B
+	SET PUSH, B ; size
+	SET B, Y
+	JSR _mem_alloc_memory
+	
+	SET C, A	; destination
+	SET B, POP	; offset from source
+	SET A, PEEK	; peek at source
+	ADD B, A	; end
+	JSR _memcpy
 	
 	ADD [_tasking_num_tasks], 1
 	SET A, 0x10 ; process info = 16 words
