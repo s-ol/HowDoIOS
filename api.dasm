@@ -40,7 +40,7 @@
 
 ; UTILS
 #define MEMSET				0xf030	; sets memory between (including) A and B to C
-#define MEMCPY				0xf031	; copies memory between (including) A and B too memory starting at C
+#define MEMCPY				0xf031	; copies memory between (including) A and B to memory starting at C
 #define STRCMP				0xf032	; compares two strings, returns 1 on success, B is the last character
 
 ; HW
