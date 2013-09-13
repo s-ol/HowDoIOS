@@ -96,10 +96,11 @@
 	dat 0xf032, _strcmp
 	
 	; HW
-	dat 0xf040, _claim_hardware
-	dat 0xf041, _release_hardware
-	dat 0xf042, _register_interrupt
-	dat 0xf043, _remove_interrupt
+	dat 0xf040, _driver_load
+	dat 0xf041, _driver_bypass
+	dat 0xf042, _driver_release
+	dat 0xf043, _driver_register_int
+	dat 0xf044, _driver_remove_int
 	
 	; MSG
 	dat 0xf050, _msg_poll
@@ -110,7 +111,7 @@
 	dat 0xf061, _mem_free
 :_api_rountines_end
 
-#include 'syscalls/hw.dasm'
+#include 'syscalls/driver.dasm'
 #include 'syscalls/io.dasm'
 #include 'syscalls/mem.dasm'
 #include 'syscalls/msg.dasm'

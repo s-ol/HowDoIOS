@@ -1,0 +1,40 @@
+; driver.dasm: drivers
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; DRIVER_LOAD (0xf040)
+; loads the driver between A and (A+B) for hardware ID C
+:_driver_load
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+
+; DRIVER_BYPASS (0xf041)
+; overwrites the driver's interrupt handler
+:_driver_bypass
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+
+; DRIVER_RELEASE (0xf042)
+; reenables driver for message A
+:_driver_release
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+
+; DRIVER_REGISTER_INT (0xf043)
+; register message A (drivers)
+:_driver_register_int
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+
+; DRIVER_REMOVE_INT  (0xf044)
+; disables interrupts with message A (drivers)
+:_driver_remove_int
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
