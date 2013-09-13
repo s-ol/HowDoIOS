@@ -61,17 +61,17 @@
 	SET A, POP
 	SET PUSH, X
 	SET PUSH, Y
-	SET PUSH, A
+	SET PUSH, A ; source
+	SET PUSH, B ; size
 
 	SET Y, 0xf000 ; new pid
 
 	SET A, B
-	SET PUSH, B ; size
 	SET B, Y
 	JSR _mem_alloc_memory
 	
 	SET C, A	; destination
-	SET B, POP	; offset from source
+	SET B, POP	; size
 	SET A, PEEK	; peek at source
 	ADD B, A	; end
 	JSR _memcpy
