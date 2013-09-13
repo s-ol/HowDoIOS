@@ -77,24 +77,24 @@
 		SET PC, .enum_loop
 	
 	JSR _wait_floppy
-	
-	SET A, 0x200 ; floppy sector size
-	INT MEM_ALLOC
-	
-	SET Y, A ; to memory at a
+
+; read floppy header	
+	SET Y, .header_buf ; to memory at a
 	SET A, 2 ; read
 	SET X, 0 ; from sector 0
 	HWI [_bootloader_hardware+2] ; go!
 	
 	JSR _wait_floppy
-	
+
+; display UI
 	SET X, 0
 	SET Z, 1
 	SET PC, .print_driver
 	
+ ; poll keyboard
 :.key_loop
 	SET A, 1
-	HWI [_bootloader_hardware+1] ; poll keyboard
+	HWI [_bootloader_hardware+1]
 	IFE C, 0x80
 		SET PC, .up
 	IFE C, 0x81
@@ -107,8 +107,42 @@
 	IFN C, 0x11 ; not return
 		SET PC, .key_loop
 	
-	; load & launch drivers
+; load & launch drivers
+	HWN Z
+:.load_loop
+	SUB Z, 1
+	
+	SET C, Z
+	MUL C, 0x2
+	ADD C, J ; get driver id ([C])
+	IFE [C], 0 ; no driver set
+		SET PC, .load_loop
+
+	JSR _wait_floppy
+	SET A, 2
+	SET Y, [.sector_buf]
+	SET X, [C]
+	HWI [_bootloader_hardware+2] ; load driver into buffer
+	JSR _wait_floppy
+	
+	SET A, .sector_buf ; source
+	SET B, X
+	ADD B, .header_buf
+	SET B, [B] ; A driver info
+	ADD B, .header_buf
+	SET B, [B] ; driver size
+	; INT DRIVER_LOAD ; create a new process
+	
+	; call the init hook
+	
+	IFN Z, 0
+		SET PC, .load_loop
 	SUB PC, 1
+	
+	; open shell
+	
+; exit
+	INT PROC_EXIT
 	
 :.up
 	IFE X, 0
@@ -179,6 +213,13 @@
 	
 	SET PC, .key_loop
 
+:.header_buf
+.reserve 0x200
+
+:.sector_buf
+.reserve 0x200
+
+
 :_wait_floppy
 	SET A, 0
 	HWI [_bootloader_hardware+2] ; poll floppy
@@ -246,3 +287,4 @@
 	
 :_name_clear
 	dat 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2020, 0x2000
+dat "penises"

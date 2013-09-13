@@ -24,6 +24,9 @@ dat first, second, third, fourth
 	dat .exit
 	dat .interrupt
 	dat .app_call
+	dat 0
+:.main
+	INT PROC_SKIP ; idle
 :.init
 	SET [.id], A
 	SET PC, POP
@@ -43,6 +46,9 @@ dat first, second, third, fourth
 	dat .exit
 	dat .interrupt
 	dat .app_call
+	dat 0
+:.main
+	INT PROC_SKIP ; idle
 :.init
 	SET [.id], A
 	SET PC, POP
@@ -62,6 +68,9 @@ dat first, second, third, fourth
 	dat .exit
 	dat .interrupt
 	dat .app_call
+	dat 0
+:.main
+	INT PROC_SKIP ; idle
 :.init
 	SET [.id], A
 	SET PC, POP
@@ -81,6 +90,9 @@ dat first, second, third, fourth
 	dat .exit
 	dat .interrupt
 	dat .app_call
+	dat 0
+:.main
+	INT PROC_SKIP ; idle
 :.init
 	SET [.id], A
 	SET PC, POP
@@ -93,3 +105,5 @@ dat first, second, third, fourth
 
 :.id dat 0
 	:sector_four_end
+
+#include '../api.dasm'
