@@ -29,13 +29,17 @@
 	ADD A, 1
 	ADD [A], B ; relocate
 	IFG A, [C] ; we're past
-		SET PC, .reloc_loop
+		SET PC, .reloc_done
+	SET PC, .reloc_loop
+:.reloc_done
 	
 ; set PC to main routine
+	SET C, B
+	SET B, PEEK ; proc info
 	SET [B+0xa], A ; jump past table
 	
 ; call 'init' hook
-	SET PUSH, [B]
+	SET PUSH, [C]
 	JSR _lib_call_routine
 	
 	SET B, POP
@@ -44,7 +48,7 @@
 	SET PC, POP
 
 ; LIB_CALL (0xf071)
-; calls function A with semaphore-like behaviour
+; calls function on stack with semaphore-like behaviour
 :_lib_call
 	SET A, POP
 	JSR _lib_call_routine
@@ -52,7 +56,11 @@
 	SET PC, POP
 
 :_lib_call_routine
-	SET PUSH, B
+	XOR PEEK, PICK 1	; | RET | func
+	XOR PICK 1, PEEK	;   --->
+	XOR PEEK, PICK 1	; | func | RET
+	
+	SET PUSH, B ; | B | func | RET
 ; find library process (B - proc info)
 	IFB [B+0xf], 0x2 ; 	semaphore-bit is set
 		SET PC, .block
@@ -60,22 +68,45 @@
 	BOR [B+0xf], 0x2 ; set bit
 
 ; call function
+	XOR B, PEEK			; | B  | func
+	XOR PEEK, B			;   --->
+	XOR B, PEEK			; | pi | func
+	
+	XOR PEEK, PICK 1	; | pi | func
+	XOR PICK 1, PEEK	;   --->
+	XOR PEEK, PICK 1	; | func | pi
+	
+	SET PUSH, .reentry	; | RET | func | pi
+	XOR PEEK, PICK 1	; | RET | func | pi
+	XOR PICK 1, PEEK	;   --->
+	XOR PEEK, PICK 1	; | func | RET | pi
+	SET PUSH, A			; | A | RET | func | pi
+	RFI 0				; | pi
+:.reentry
 	SET B, POP
-	JSR A
-
 ; open semaphore
 	XOR [B+0xf], 0x2 ; flip bit (unset)
-	SET A, [B+1] ; next task
+	SET C, [B+1] ; next task
 :.loop
-	IFE [A+0xd], B ; gotcha
+	IFE [C+0xd], B ; gotcha
 		SET PC, .done
-	SET A, [A+1] ; next
-	IFE A, B ; we went a full loop
+	SET C, [C+1] ; next
+	IFE C, B ; we went a full loop
 		SET PC, POP ; let's leave
 	SET PC, .loop
 :.done
 	XOR [A+0xf], 0x2 ; unlock
 	SET PC, POP
+
+:.block
+	SET C, [_tasking_current_task]
+	SET [C+0xd], B ; semaphore-process
+	BOR [C+0xf], 1 ; locked
+	SET B, POP
+	; PC is still on stack (func)
+	SET PUSH, A
+	SET PUSH, 0 ; 0 | A | func
+	SET PC, _tasking_next_slice ; stop executing this thread 
 
 ; LIB_GET_EXPORTS (0xf072)
 ; write library A's exports to memory starting at B

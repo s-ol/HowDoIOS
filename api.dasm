@@ -52,4 +52,4 @@
 ; LIB
 #define LIB_LOAD			0xf070 ; loads the library between A and (A+B), returns pid [and proc info]
 #define LIB_CALL			0xf071 ; calls function A with semaphore-like behaviour
-#define LIB_GET_EXPORTS	0xf072 ; write library A's exports to memory starting at B
+#define LIB_GET_EXPORTS		0xf072 ; write library A's exports to memory starting at B
