@@ -74,7 +74,7 @@
 		SET PC, POP ; let's leave
 	SET PC, .loop
 :.done
-	XOR [A+0x1], 0x2 ; unlock
+	XOR [A+0xf], 0x2 ; unlock
 	SET PC, POP
 
 ; LIB_GET_EXPORTS (0xf072)
