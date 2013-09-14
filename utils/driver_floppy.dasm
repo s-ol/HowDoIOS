@@ -20,15 +20,14 @@ dat first, second, third, fourth
 	.origin 0x200
 
 :sector_one ; default
-	dat .init
-	dat .exit
-	dat .interrupt
-	dat .app_call
+	dat (.init - sector_one)
+	dat (.exit - sector_one)
+	dat (.interrupt - sector_one)
 	dat 0
 :.main
 	INT PROC_SKIP ; idle
 :.init
-	SET [.id], A
+	; SET [.id], A
 	SET PC, POP
 :.exit
 	SET PC, POP
@@ -42,15 +41,14 @@ dat first, second, third, fourth
 	.origin 0x400
 	
 :sector_two ; basic_keyboard
-	dat .init
-	dat .exit
-	dat .interrupt
-	dat .app_call
+	dat (.init - sector_two)
+	dat (.exit - sector_two)
+	dat (.interrupt - sector_two)
 	dat 0
 :.main
 	INT PROC_SKIP ; idle
 :.init
-	SET [.id], A
+	; SET [.id], A
 	SET PC, POP
 :.exit
 	SET PC, POP
@@ -64,15 +62,14 @@ dat first, second, third, fourth
 	.origin 0x600
 	
 :sector_three ; M35FD_0.1
-	dat .init
-	dat .exit
-	dat .interrupt
-	dat .app_call
+	dat (.init - sector_three)
+	dat (.exit - sector_three)
+	dat (.interrupt - sector_three)
 	dat 0
 :.main
 	INT PROC_SKIP ; idle
 :.init
-	SET [.id], A
+	; SET [.id], A
 	SET PC, POP
 :.exit
 	SET PC, POP
@@ -86,15 +83,14 @@ dat first, second, third, fourth
 	.origin 0x800
 	
 :sector_four ; LEM1802_0.1
-	dat .init
-	dat .exit
-	dat .interrupt
-	dat .app_call
+	dat (.init - sector_four)
+	dat (.exit - sector_four)
+	dat (.interrupt - sector_four)
 	dat 0
 :.main
 	INT PROC_SKIP ; idle
 :.init
-	SET [.id], A
+	; SET [.id], A
 	SET PC, POP
 :.exit
 	SET PC, POP
