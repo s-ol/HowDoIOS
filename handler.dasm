@@ -48,10 +48,6 @@
 	RFI 0
 	
 :.call
-	; SET A, POP
-	; SET EX, POP
-	; SET PC, [B+1]
-	
 	SET B, [B+1]
 	XOR B, PEEK ; swap B (routine)...
 	XOR PEEK, B ; ...and [SP] (parameter B)
@@ -95,7 +91,7 @@
 	dat 0xf031, _memcpy
 	dat 0xf032, _strcmp
 	
-	; HW
+	; DRIVER
 	dat 0xf040, _driver_load
 	dat 0xf041, _driver_bypass
 	dat 0xf042, _driver_release
@@ -109,13 +105,20 @@
 	; MEM management
 	dat 0xf060, _mem_alloc
 	dat 0xf061, _mem_free
+	
+	; LIB
+	dat 0xf070, _lib_load
+	dat 0xf071, _lib_call
+	dat 0xf072, _lib_get_exports
 :_api_rountines_end
 
-#include 'syscalls/driver.dasm'
-#include 'syscalls/io.dasm'
-#include 'syscalls/mem.dasm'
-#include 'syscalls/msg.dasm'
+
 #include 'syscalls/os.dasm'
 #include 'syscalls/proc.dasm'
+#include 'syscalls/io.dasm'
 #include 'syscalls/utils.dasm'
+#include 'syscalls/driver.dasm'
+#include 'syscalls/msg.dasm'
+#include 'syscalls/mem.dasm'
+#include 'syscalls/lib.dasm'
 #include 'tasking.dasm'

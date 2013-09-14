@@ -1,0 +1,85 @@
+; lib.dasm: library processes
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; LIB_LOAD (0xf070)
+; loads the library between A and (A+B), returns pid [and proc info]
+:_lib_load
+	SET A, POP
+	JSR _lib_load_library
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+	
+:_lib_load_library
+	JSR _proc_new_task ; load process
+	SET PUSH, A ; store pid
+	SET PUSH, B ; and proc info
+; set library flag
+	BOR [B+0xe], 0x4
+
+; relocate hooks & jumptable
+	SET C, [B+0xa] ; PC = start of memory
+	SET B, C ; save start of memory
+	ADD C, 1 ; num jumptable entries
+	SET A, C
+	ADD C, [C] ; C+1 = last entry
+:.reloc_loop
+	ADD A, 1
+	ADD [A], B ; relocate
+	IFG A, [C] ; we're past
+		SET PC, .reloc_loop
+	
+; set PC to main routine
+	SET [B+0xa], A ; jump past table
+	
+; call 'init' hook
+	SET PUSH, [B]
+	JSR _lib_call_routine
+	
+	SET B, POP
+	SET A, POP
+	
+	SET PC, POP
+
+; LIB_CALL (0xf071)
+; calls function A with semaphore-like behaviour
+:_lib_call
+	SET A, POP
+	JSR _lib_call_routine
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP
+
+:_lib_call_routine
+	SET PUSH, B
+; find library process (B - proc info)
+	IFB [B+0xf], 0x2 ; 	semaphore-bit is set
+		SET PC, .block
+; lock semaphore
+	BOR [B+0xf], 0x2 ; set bit
+
+; call function
+	SET B, POP
+	JSR A
+
+; open semaphore
+	XOR [B+0xf], 0x2 ; flip bit (unset)
+	SET A, [B+1] ; next task
+:.loop
+	IFE [A+0xd], B ; gotcha
+		SET PC, .done
+	SET A, [A+1] ; next
+	IFE A, B ; we went a full loop
+		SET PC, POP ; let's leave
+	SET PC, .loop
+:.done
+	XOR [A+0x1], 0x2 ; unlock
+	SET PC, POP
+
+; LIB_GET_EXPORTS (0xf072)
+; write library A's exports to memory starting at B
+:_lib_get_exports
+	SET A, POP
+	IAQ 0 ; disable interrupt queueing
+	SET PC, POP

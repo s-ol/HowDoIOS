@@ -35,7 +35,7 @@
 #define STRCMP				0xf032	; compares two strings, returns 1 on success, B is the last character
 
 ; DRIVER
-#define DRIVER_LOAD			0xf040	; loads the driver between A and (A+B) for hardware ID C
+#define DRIVER_LOAD			0xf040	; loads the driver between A and (A+B) for hardware ID C, returns pid [and proc info]
 #define DRIVER_BYPASS		0xf041	; overwrites the driver's interrupt handler
 #define DRIVER_RELEASE		0xf042	; reenables driver for message A
 #define DRIVER_REGISTER_INT 0xf043	; register message A (drivers)
@@ -48,3 +48,8 @@
 ; MEM management
 #define MEM_ALLOC			0xf060	; allocates A words of memory for the current process, returns 0 or the address
 #define MEM_FREE			0xf061	; frees the memory at A
+
+; LIB
+#define LIB_LOAD			0xf070 ; loads the library between A and (A+B), returns pid [and proc info]
+#define LIB_CALL			0xf071 ; calls function A with semaphore-like behaviour
+#define LIB_GET_EXPORTS	0xf072 ; write library A's exports to memory starting at B
