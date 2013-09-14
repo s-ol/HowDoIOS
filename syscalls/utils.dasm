@@ -1,24 +1,30 @@
-; MEMSET (0xf030 )
+; utils.dasm: utility syscalls
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; MEMSET (0xf030)
 ; sets memory between (including) A and B to C
 :_memset
-	SET A, POP
+	SET A, PEEK ; leave A on the stack
 :.loop
 	IFG A, B
-		SET PC, _utils_end
+		RFI 0
 	SET [A], C
 	ADD A, 1
 	SET PC, .loop
 
-; MEMCPY (0xf031 )
-; copies memory between (including) A and B too memory starting at C
+; MEMCPY (0xf031)
+; copies memory between (including) A and B to memory starting at C
 :_memcpy
-	SET A, POP
+	SET A, PEEK
 :.loop
-	IFG A, C
-		SET PC, _utils_end
-	SET [A], [B]
+	IFG A, B
+		RFI 0
+	SET [A], [C]
 	ADD A, 1
-	ADD B, 1
+	ADD C, 1
 	SET PC, .loop
 
 ; STRCMP (0xf032)
@@ -43,14 +49,8 @@
 	ADD C, 1
 	SET PC, _strcmp_wind
 :_strcmp_failure
-	SET A, 0
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET PUSH, 0
+	RFI 0
 :_strcmp_success
-	SET A, 1
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
-	
-:_utils_end
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET PUSH, 1
+	RFI 0

@@ -1,3 +1,9 @@
+; tasking.dasm: multitasking
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 :_tasking_next_slice
 	SET A, [_tasking_current_task]
 	SET [A+0xc], POP ; store EX
@@ -28,10 +34,9 @@
 	SET SP,   [A+0xb] ; restore SP
 	SET PUSH, [A+0xa] ; save PC
 	SET EX,   [A+0xc] ; restore EX
-	SET A,    [A+0x2] ; restore A
+	SET PUSH, [A+0x2] ; restore A
 	
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP       ; restore PC
+	RFI 0 ; jump
 
 :_tasking_num_tasks		dat 0 ; num tasks
 :_tasking_current_pid	dat 0 ; current process id

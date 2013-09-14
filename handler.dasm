@@ -1,4 +1,9 @@
-; the main interrupt handler
+; handler.dasm: main interrupt handler and syscall management
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
 ; IA should always point here. This fires all processes hooks and does the slice switching
 :_interrupt_handler
 	SET PUSH, EX ; EX will change when using ADD / SUB etc, so we need to back it up
@@ -43,10 +48,9 @@
 	RFI 0
 	
 :.call
-	SET A, POP
-	SET EX, POP
-	; ADD SP, 2
-	SET PC, [B+1]
+	; SET A, POP
+	; SET EX, POP
+	; SET PC, [B+1]
 	
 	SET B, [B+1]
 	XOR B, PEEK ; swap B (routine)...

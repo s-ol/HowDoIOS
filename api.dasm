@@ -1,48 +1,49 @@
-; *************************
-; Project: S0lllOS
-; File: api.dasm
-; *************************
+; api.dasm: syscall defines for user applications
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
 
 ; OS
-:os_version			dat 0xf000	; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor
-:os_shutdown		dat 0xf001	; shuts the system down (kills all processes and halts)
+#define OS_VERSION			0xf000	; returns the OS' Version in A. MMMMMMMMmmmmmmmm M=Major m=minor
+#define OS_SHUTDOWN			0xf001	; shuts the system down (kills all processes and halts)
 
 ; PROC
-:proc_exit			dat 0xf010	; terminate the current (calling) process
-:proc_getid			dat 0xf011	; returns pid of the calling process (A)
-:proc_fork			dat 0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
-:proc_kill			dat 0xf013	; terminate process with pid in A
-:proc_exec			dat 0xf014	; creates a new process from the memory at A, returns pid in A
-:proc_skip			dat 0xf015	; skips current process / slice (give other processes more time)
+#define PROC_EXIT			0xf010	; terminate the current (calling) process
+#define PROC_GETID			0xf011	; returns pid of the calling process (A)
+#define PROC_FORK			0xf012	; copies the calling process. returns the child pid in the main, 0 in the child process
+#define PROC_KILL			0xf013	; terminate process with pid in A
+#define PROC_EXEC			0xf014	; creates a new process from the memory starting at A and with length B, returns pid in A
+#define PROC_SKIP			0xf015	; skips current process / slice (give other processes more time)
 
 ; IO
-:puts				dat 0xf020	; writes a string to the console (if connected)
-:gets				dat 0xf021	; waits for a string on the console (if connected)
-:fopen				dat 0xf022	; opens file with name string at A, returns file descriptor or 0 in A
-:fclose				dat 0xf023	; closes file descriptor A
-:fputs				dat 0xf024	; writes string at B into file A, starting from current cursor
-:fgets				dat 0xf025	; gets zero-terminated string from file A to memory at B
-:fgetsn				dat 0xf026	; gets zero-terminated string or C words from file A to memory at B
-:fseek				dat 0xf027	; seeks forward B words in file A, starting from current cursor
-:fpos				dat 0xf028	; goes to position B words from start of file A
-:fwrite				dat 0xf029	; writes C words from B into file A
-:fread				dat 0xf02a	; reads C words from file A into memory at B, starting from current cursor
+#define PUTS				0xf020	; writes a string to the console (if connected)
+#define GETS				0xf021	; waits for a string on the console (if connected)
+#define FOPEN				0xf022	; opens file with name string at A, returns file descriptor or 0 in A
+#define FCLOSE				0xf023	; closes file descriptor A
+#define FPUTS				0xf024	; writes string at B into file A, starting from current cursor
+#define FGETS				0xf025	; gets zero-terminated string from file A to memory at B
+#define FGETSN				0xf026	; gets zero-terminated string or C words from file A to memory at B
+#define FSEEK				0xf027	; seeks forward B words in file A, starting from current cursor
+#define FPOS				0xf028	; goes to position B words from start of file A
+#define FWRITE				0xf029	; writes C words from B into file A
+#define FREAD				0xf02a	; reads C words from file A into memory at B, starting from current cursor
 
 ; UTILS
-:memset				dat 0xf030	; sets memory between (including) A and B to C
-:memcpy				dat 0xf031	; copies memory between (including) A and B too memory starting at C
-:strcmp				dat 0xf032	; compares two strings, returns 1 on success, B is the last character
+#define MEMSET				0xf030	; sets memory between (including) A and B to C
+#define MEMCPY				0xf031	; copies memory between (including) A and B to memory starting at C
+#define STRCMP				0xf032	; compares two strings, returns 1 on success, B is the last character
 
 ; HW
-:claim_hardware		dat 0xf040	; turns off interrupts with message A in all other processes
-:release_hardware	dat 0xf041	; reenables interrupts for message A
-:register_interrupt	dat 0xf042	; registers the interrupt handler for message A at B
-:remove_interrupt 	dat 0xf043	; removes the interrupt handler for message A
+#define CLAIM_HARDWARE		0xf040	; turns off interrupts with message A in all other processes
+#define RELEASE_HARDWARE	0xf041	; reenables interrupts for message A
+#define REGISTER_INTERRUPT	0xf042	; registers the interrupt handler for message A at B
+#define REMOVE_INTERRUPT 	0xf043	; removes the interrupt handler for message A
 
 ; MSG
-:msg_poll			dat 0xf050	; polls a message from the queue into memory at A, returns 1 on success, 0 if no new message
-:msg_send			dat 0xf051	; sends message B to process with id A
+#define MSG_POLL			0xf050	; polls a message from the queue into memory at A, returns 1 on success, 0 if no new message
+#define MSG_SEND			0xf051	; sends message B to process with id A
 
 ; MEM management
-:mem_alloc			dat 0xf060	; allocates A words of memory for the current process, returns 0 or the address
-:mem_free			dat 0xf061	; frees the memory at A
+#define MEM_ALLOC			0xf060	; allocates A words of memory for the current process, returns 0 or the address
+#define MEM_FREE			0xf061	; frees the memory at A
