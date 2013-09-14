@@ -32,7 +32,7 @@
 	SET C, Y
 	JSR _scr_packed_string
 	
-	SET A, _shell_welcome
+	SET A, _shell_test
 	SET B, 0xa000
 	JSR _adv_line
 	SET C, Y
@@ -48,6 +48,7 @@
 :_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
 :_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
 :_shell_cmd_not_found dat 0x756e, 0x6b6e, 0x6f77, 0x6e20, 0x636f, 0x6d6d, 0x616e, 0x6400 ; "unknown command", 0	
+:_shell_test dat 0x6465, 0x6661, 0x756c, 0x7400
 	
 #include 'lib/screenutils.dasm'
 :end
