@@ -7,13 +7,11 @@
 ; MSG_POLL (0xf050)
 ; polls a message from the queue into memory at A, returns 1 on success, 0 if no new message
 :_msg_poll
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 
 ; MSG_SEND (0xf051)
 ; sends message B to process with id A
 :_msg_send
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0

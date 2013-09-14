@@ -7,10 +7,9 @@
 ; LIB_LOAD (0xf070)
 ; loads the library between A and (A+B), returns pid [and proc info]
 :_lib_load
-	SET A, POP
+	SET A, PEEK
 	JSR _lib_load_library
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 	
 :_lib_load_library
 	JSR _proc_new_task ; load process
@@ -50,10 +49,9 @@
 ; LIB_CALL (0xf071)
 ; calls function on stack with semaphore-like behaviour
 :_lib_call
-	SET A, POP
+	SET A, PEEK
 	JSR _lib_call_routine
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 
 :_lib_call_routine
 	XOR PEEK, PICK 1	; | RET | func
@@ -111,6 +109,5 @@
 ; LIB_GET_EXPORTS (0xf072)
 ; write library A's exports to memory starting at B
 :_lib_get_exports
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0

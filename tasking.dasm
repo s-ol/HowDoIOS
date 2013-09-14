@@ -37,10 +37,9 @@
 	SET SP,   [A+0xb] ; restore SP
 	SET PUSH, [A+0xa] ; save PC
 	SET EX,   [A+0xc] ; restore EX
-	SET A,    [A+0x2] ; restore A
+	SET PUSH, [A+0x2] ; restore A
 	
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP       ; restore PC
+	RFI 0 ; jump
 
 :_tasking_num_tasks		dat 0 ; num tasks
 :_tasking_current_pid	dat 0 ; current process id
