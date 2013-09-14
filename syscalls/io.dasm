@@ -6,80 +6,69 @@
 ; PUTS (0xf020)
 ; writes string at A to the console (if connected)
 :_puts
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 	
 ; GETS (0xf021)
 ; waits for a string on the console, write to A (if connected)
 :_gets
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 	
 ; FOPEN (0xf022)
 ; opens file with name string at A, returns file descriptor or 0 in A
 :_fopen
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 	
 ; FCLOSE (0xf023)
 ; closes file descriptor A
 :_fclose
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 	
 ; FPUTS (0xf024)
 ; writes string at B into file A, starting from current cursor
 :_fputs
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 
 ; FGETS (0xf025)
 ; gets zero-teminated string from file A to memory at B
 :_fgets
-	SET A, POP
+	SET A, PEEK
 	; get zero-teminated string from file A to memory at B
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 
 ; FGETSN (0xf026)
 ; gets zero-terminated string or C words from file A to memory at B
 :_fgetsn
-	SET A, POP
+	SET A, PEEK
 	; get zero-terminated string or C words from file A to memory at B
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 
 ; FSEEK (0xf027)
 ; seeks forward B words in file A, starting from current cursor
 :_fseek
-	SET A, POP
+	SET A, PEEK
 	; add B to file cursor index for fd A
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 
 ; FPOS (0xf028)
 ; goes to position B words from start of file A
 :_fpos
-	SET A, POP
+	SET A, PEEK
 	; set file cursor index for fd A
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	RFI 0
 	
 ; FWRITE (0xf029)
 ; writes C words from B into file A
 :_fwrite
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK
+	RFI 0
 	
 ; FREAD (0xf02a)
 ; reads C words from file A into memory at B, starting from current cursor
 :_fread
-	SET A, POP
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET A, PEEK 
+	RFI 0
