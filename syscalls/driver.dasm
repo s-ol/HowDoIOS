@@ -8,6 +8,12 @@
 ; loads the driver between A and (A+B) for hardware ID C
 :_driver_load
 	SET A, POP
+; load thread
+	JSR _lib_load_library
+	
+ ; set driver flag, insert into driver tables
+	BOR [B+0xe], 0x2
+	; insert into driver table
 	IAQ 0 ; disable interrupt queueing
 	SET PC, POP
 
