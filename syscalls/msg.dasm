@@ -1,7 +1,7 @@
 ; msg.dasm: inter-process communication syscalls
 ;
-; This file is part of S0lllOS.
-; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
 ;  Copyright (C) 2013 S0lll0s
 
 ; MSG_POLL (0xf050)

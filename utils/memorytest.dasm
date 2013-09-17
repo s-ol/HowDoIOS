@@ -1,5 +1,5 @@
 ; *************************
-; Project: S0lllOS
+; Project: HowDoIOS
 ; File: memorytest.dasm
 ;  Tests memory.dasm by getting to LEM1802 buffers (each 0x182w) and writing "A" and "B" to them, then switching between them.
 ;  Connect a LEM1802 to hardware port 1

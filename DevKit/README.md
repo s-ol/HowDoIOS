@@ -1,4 +1,4 @@
-This folder contains the 0x10c DevKit project files for **S0lllOS**.
+This folder contains the 0x10c DevKit project files for **HowDoIOS**.
 
 As of now, you need to manually replace all the `.reserve` statements with `reserve`'s, I added both so you just need to (un)comment.
 
