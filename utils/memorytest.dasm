@@ -1,9 +1,10 @@
-; *************************
-; Project: S0lllOS
-; File: memorytest.dasm
-;  Tests memory.dasm by getting to LEM1802 buffers (each 0x182w) and writing "A" and "B" to them, then switching between them.
-;  Connect a LEM1802 to hardware port 1
-; *************************
+; memorytest.dasm: memory-management test
+;
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
+;  Copyright (C) 2013 S0lll0s
+
+;  Connect a LEM1802 to hardware port 0
 
 :_main
 	; jsr proc_get_id
@@ -71,4 +72,4 @@
 dat "IDS"
 :lem_ids dat 0, 0, 0
 
-.include "../lib/memory.dasm"
+.include "../syscalls/mem.dasm"

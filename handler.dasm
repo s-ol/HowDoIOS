@@ -1,7 +1,7 @@
 ; handler.dasm: main interrupt handler and syscall management
 ;
-; This file is part of S0lllOS.
-; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
 ;  Copyright (C) 2013 S0lll0s
 
 ; IA should always point here. This fires all processes hooks and does the slice switching

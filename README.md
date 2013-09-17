@@ -1,7 +1,7 @@
-S0lllOS
+HowDoIOS
 =======
-
-**S0lllOS** is an open-source DCPU-16 OS.
+![HowDoIOS](howdoios-200x200.png "HowDoIOS logo")  
+**HowDoIOS** is an open-source DCPU-16 OS.
 When finished, it will have a shell, multitasking, modular drivers and a working FLOP filesystem.
 
 ## Project Status
@@ -27,4 +27,4 @@ You can find the documentation [in the wiki][wiki] here on github.
 [done]: http://i.imgur.com/sP5cqwu.png "done icon"
 [partially]: http://i.imgur.com/crFjkxm.png "partially icon"
 [broken]: http://i.imgur.com/Otx8K0g.png "broken icon"
-[wiki]: https://github.com/S0lll0s/S0lllOS/wiki
+[wiki]: https://github.com/S0lll0s/HowDoIOS/wiki
