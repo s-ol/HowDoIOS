@@ -1,6 +1,6 @@
 HowDoIOS
 =======
-
+![HowDoIOS](howdoios-200x200.png "HowDoIOS logo")  
 **HowDoIOS** is an open-source DCPU-16 OS.
 When finished, it will have a shell, multitasking, modular drivers and a working FLOP filesystem.
 
