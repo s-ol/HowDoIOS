@@ -10,7 +10,7 @@
 	
 	SET X, A		; backup in X
 	SET Y, X		; Y = Cursor
-	
+
 	SET A, 0
 	SET B, X
 	HWI 2
@@ -20,35 +20,75 @@
 	SET C, Y
 	JSR _scr_packed_string
 	
+	JSR _adv_line
 	SET A, _shell_welcome
 	SET B, 0xa000
-	JSR _adv_line
 	SET C, Y
 	JSR _scr_packed_string
 	
-	SET A, _shell_welcome
-	SET B, 0xa000
-	JSR _adv_line
-	SET C, Y
-	JSR _scr_packed_string
+	SET A, 0x20 ; 15 chars should be more than enough for now
+	INT MEM_ALLOC
+	;SET [_shell_command], A
+	SET [A], 0
 	
-	SET A, _shell_test
-	SET B, 0xa000
+:_shell_prompt
 	JSR _adv_line
+	SET [Y], [_char_prompt]
+	
+	SET Z, Y ; backup last cursor position to reverse blinking later on
+	ADD Y, 2
+	
+	SET I, 0 ; I will be our char counter to change _shell_command
+	
+:_cmd_loop
+	SET A, _shell_command
+	SET B, 0xa000
 	SET C, Y
-	JSR _scr_packed_string
+	JSR _scr_string
+
+	SET C, 0
+	SET A, 1
+	HWI 1
+	
+	IFE C, 0x00
+		SET PC, _cmd_loop
+		
+	IFE C, 0x10
+		SET PC, _shell_backspace
+		
+	IFE C, 0x11
+		SET PC, _cmd_finish
+		
+	SET [_shell_command+I], C ; we want to leave our string null-terminated
+	SET [_shell_command+I+1], 0x00
+	ADD I, 1
+	
+	SET PC, _cmd_loop
+	
+:_cmd_finish	
+	SET PC, _end
 	
 :_end
-	SUB PC, 1
+	SET PC, _end
 	
 :_adv_line
 	ADD Y, 0x20
 	SET PC, POP
 	
-:_shell_banner dat 0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
-:_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
-:_shell_cmd_not_found dat 0x756e, 0x6b6e, 0x6f77, 0x6e20, 0x636f, 0x6d6d, 0x616e, 0x6400 ; "unknown command", 0	
-:_shell_test dat 0x6465, 0x6661, 0x756c, 0x7400
+:_shell_backspace
+	IFN I, 0
+		SUB I, 1
+	SET [_shell_command+I+1], 0x00
+	SET PC, _cmd_loop
 	
-#include 'lib/screenutils.dasm'
-:end
+:_shell_banner dat 	0x5330, 0x6c6c, 0x6c4f, 0x5320, 0x312e, 0x3000 ; "S0lllOS 1.0", 0
+:_shell_welcome	dat 0x5765, 0x6c63, 0x6f6d, 0x6520, 0x6261, 0x636b, 0x2100 ; "Welcome back!", 0
+:_shell_cmd_not_found dat 	0x756e, 0x6b6e, 0x6f77, 0x6e20, 0x636f, 0x6d6d, 0x616e, 0x6400 ; "unknown command", 0	
+:_string_default dat 0x6465, 0x6661, 0x756c, 0x7400
+:_char_prompt dat 0xc0be, 0x0000 ; blinking red '>'
+:_cmd_array dat _cmd_halt, _cmd_test, 0x0000
+:_cmd_halt dat 0x6861, 0x6c74, 0x0000 ; "halt"
+:_cmd_test dat 0x7465, 0x7374, 0x0000 ; "test"
+:_shell_command dat 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+	
+.include 'lib/screenutils.dasm'

@@ -6,16 +6,17 @@
 
 ; _scr_string(string, cursor)
 ; A = Pointer to string
-; B = Cursor
+; B = Format
+; C = Cursor
 
 :_scr_string
-:_scr_string_loop
 	IFE [A], 0
 		SET PC, _scr_string_done
-	SET [B], [A]
+	BOR [A], B
+	SET [C], [A]
 	ADD A, 1
-	ADD B, 1
-	SET PC, _scr_string_loop
+	ADD C, 1
+	SET PC, _scr_string
 :_scr_string_done
 	SET PC, POP
 
