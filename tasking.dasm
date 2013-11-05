@@ -19,7 +19,10 @@
 	SET [A+0xb], SP  ; store SP
 	
 	SET A, [_tasking_current_task]
+:.loop
 	SET A, [A+1] ; A is next task's info
+	IFB [A+0xf], 0x1 ; process is locked, pick another one
+		SET PC, .loop
 	SET [_tasking_current_pid], [A]
 	SET [_tasking_current_task], A
 
@@ -34,10 +37,9 @@
 	SET SP,   [A+0xb] ; restore SP
 	SET PUSH, [A+0xa] ; save PC
 	SET EX,   [A+0xc] ; restore EX
-	SET A,    [A+0x2] ; restore A
+	SET PUSH, [A+0x2] ; restore A
 	
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP       ; restore PC
+	RFI 0 ; jump
 
 :_tasking_num_tasks		dat 0 ; num tasks
 :_tasking_current_pid	dat 0 ; current process id
@@ -45,5 +47,5 @@
 
 ; task info:
 ; dat pid, next entry
-; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, interrupt address
+; dat A, B, C, X, Y, Z, I, J, PC, SP, EX, locking thread
 ; dat flags, flags ; pad to power of two (16 word allocation)

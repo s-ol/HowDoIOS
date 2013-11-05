@@ -8,8 +8,7 @@
 ; terminates the current (calling) process
 :_proc_exit
 	SET PEEK, [_tasking_current_pid] ; Current Process ID
-	IAQ 0 ; disable interrupt queueing
-	SET PC, _proc_kill
+	RFI 0
 
 ; PROC_GETID (0xf011)
 ; returns pid of the calling process (A)
@@ -24,10 +23,8 @@
 	; copy process
 	; duplicate entry in processes
 	; set A to 0 in child register entries
-	ADD SP, 1
-	; A: Child Pid
-	IAQ 0 ; disable interrupt queueing
-	SET PC, POP
+	SET PEEK, 0 ; A: Child Pid
+	RFI 0
 
 ; PROC_KILL (0xf013)
 ; terminates process with pid in A
@@ -59,6 +56,11 @@
 ; creates a new process from the memory starting at A and with length B, returns pid in A
 :_proc_exec
 	SET A, POP
+	JSR _proc_new_task
+	SET PEEK, A
+	RFI 0
+	
+:_proc_new_task
 	SET PUSH, X
 	SET PUSH, Y
 	SET PUSH, A ; source
@@ -109,10 +111,11 @@
 	SET [X+0xb], A ; set SP
 	
 	SET A, Y ; new pid
-	IAQ 0 ; disable interrupt queueing
+	SET B, X ; info location
 	SET Y, POP
 	SET X, POP
-	SET PC, POP
+	SET PUSH, A
+	RFI 0
 
 ; PROC_SKIP (0xf015)
 ; skips current process / slice (give other processes more time)
