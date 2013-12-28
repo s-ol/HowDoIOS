@@ -1,0 +1,25 @@
+; block_io.dasm: BLOCK_IO interface header
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; BLOCK_IO - Block-based I/O (eg. for M35FD)
+
+#define BLOCK_IO				0	; interface id
+
+:blockio_imports
+	dat 0 ; init()				: (*void)()
+	#define BLOCK_IO_INIT		[blockio_imports+0]	; called once when the driver is loaded
+	
+	dat 0 ; exit()				: (*void)()
+	#define BLOCK_IO_EXIT		[blockio_imports+1]	; called once when the system is going down or the driver is unloaded
+	
+	dat 0 ; blocksize			: uint
+	#define BLOCK_IO_BLOCKSIZE	[blockio_imports+2]	; size of a single block, in words
+	
+	dat 0 ; load( id, *dest )	: (*void)( uint, *uint )
+	#define BLOCK_IO_LOAD		[blockio_imports+3]	; load block #id into buffer at dest
+	
+	dat 0 ; store( id, *dest )	: (*void)( uint, *uint )
+	#define BLOCK_IO_STORE		[blockio_imports+4]	; store buffer at dest in block #id

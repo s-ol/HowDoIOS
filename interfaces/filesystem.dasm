@@ -1,0 +1,40 @@
+; filesystem.dasm: FILESYSTEM interface header
+;
+; This file is part of S0lllOS.
+; Visit our git repo at https://github.com/S0lll0s/S0lllOS
+;  Copyright (C) 2013 S0lll0s
+
+; FILESYSTEM - Filesystem to store data organized in files
+
+#define FILESYSTEM				1	; interface id
+
+:filesystem_imports
+	dat 0 ; init()						: (*void)()
+	#define FILESYSTEM_INIT		[filesystem_imports+0]	; called once when the driver is loaded
+	
+	dat 0 ; exit()						: (*void)()
+	#define FILESYSTEM_EXIT		[filesystem_imports+1]	; called once when the system is going down or the driver is unloaded
+
+	dat 0 ; fopen( filename )			: (*uint)( const char[] )
+	#define FILESYSTEM_FOPEN	[filesystem_imports+2]	; opens a file for reading and writing, returns intern file descriptor or 0
+
+	dat 0 ; fclose( fd )				: (*void)( uint )
+	#define FILESYSTEM_FCLOSE	[filesystem_imports+3]	; closes a file
+
+	dat 0 ; freads( fd, *buffer )		: (*uint)( uint, char[] )
+	#define FILESYSTEM_FREADS	[filesystem_imports+4]	; reads from file fd until a \0 character is detected. Returns number of read words. WARNING: Overflows
+
+	dat 0 ; freadn( fd, size, *buffer )	: (*uint)( uint, uint, char[] )
+	#define FILESYSTEM_READN	[filesystem_imports+5]	; reads from size words from file fd into buffer at buffer. Returns number of read words (EOF)
+
+	dat 0 ; fwrites( fd, *buffer )		: (*uint)( uint, char[] )
+	#define FILESYSTEM_FWRITES	[filesystem_imports+6]	; writes from buffer buffer to file fd until a \0 character is detected. Returns number of written words
+
+	dat 0 ; fwriten( fd, size, *buffer ): (*void)( uint, uint, char[] )
+	#define FILESYSTEM_FWRITEN	[filesystem_imports+7]	; writes size words from buffer at buffer to file fd
+
+	dat 0 ; fseekf( fd, amount )		: (*uint)( uint, uint )
+	#define FILESYSTEM_FSEEKF	[filesystem_imports+8]	; seeks amount words forwards in file fd. Returns number of seeked words (EOF)
+
+	dat 0 ; fseekb( fd, amount )		: (*uint)( uint, uint )
+	#define FILESYSTEM_FSEEKB	[filesystem_imports+9]	; seeks amount words backwards in file fd. Returns number of seeked words (Start O F)
