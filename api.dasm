@@ -16,18 +16,8 @@
 #define PROC_EXEC			0xf014	; creates a new process from the memory starting at A and with length B, returns pid in A
 #define PROC_SKIP			0xf015	; skips current process / slice (give other processes more time)
 
-; IO
-#define PUTS				0xf020	; writes a string to the console (if connected)
-#define GETS				0xf021	; waits for a string on the console (if connected)
-#define FOPEN				0xf022	; opens file with name string at A, returns file descriptor or 0 in A
-#define FCLOSE				0xf023	; closes file descriptor A
-#define FPUTS				0xf024	; writes string at B into file A, starting from current cursor
-#define FGETS				0xf025	; gets zero-terminated string from file A to memory at B
-#define FGETSN				0xf026	; gets zero-terminated string or C words from file A to memory at B
-#define FSEEK				0xf027	; seeks forward B words in file A, starting from current cursor
-#define FPOS				0xf028	; goes to position B words from start of file A
-#define FWRITE				0xf029	; writes C words from B into file A
-#define FREAD				0xf02a	; reads C words from file A into memory at B, starting from current cursor
+; DEP
+#define DEP_LOAD			0xf020	; load exports of interface number A into import structure at B
 
 ; UTILS
 #define MEMSET				0xf030	; sets memory between (including) A and B to C

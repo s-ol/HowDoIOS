@@ -77,18 +77,8 @@
 	dat 0xf014, _proc_exec
 	dat 0xf015, _tasking_next_slice ; _proc_skip is directly mapped to _tasking_next_slice
 	
-	; IO
-	dat 0xf020, _puts
-	dat 0xf021, _gets
-	dat 0xf022, _fopen
-	dat 0xf023, _fclose
-	dat 0xf024, _fputs
-	dat 0xf025, _fgets
-	dat 0xf026, _fgetsn
-	dat 0xf027, _fseek
-	dat 0xf028, _fpos
-	dat 0xf029, _fwrite
-	dat 0xf02a, _fread
+	; DEP
+	dat 0xf020, _dep_load
 	
 	; UTILS
 	dat 0xf030, _memset
@@ -110,11 +100,11 @@
 	dat 0xf061, _mem_free
 :_api_rountines_end
 
-#include 'syscalls/hw.dasm'
-#include 'syscalls/io.dasm'
-#include 'syscalls/mem.dasm'
-#include 'syscalls/msg.dasm'
 #include 'syscalls/os.dasm'
 #include 'syscalls/proc.dasm'
+#include 'syscalls/dep.dasm'
 #include 'syscalls/utils.dasm'
+#include 'syscalls/hw.dasm'
+#include 'syscalls/msg.dasm'
+#include 'syscalls/mem.dasm'
 #include 'tasking.dasm'

@@ -1,0 +1,13 @@
+; hardware.dasm: HARDWARE interface header
+;
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
+;  Copyright (C) 2013 S0lll0s
+
+; HARDWARE - Hardware ID (virtual)
+
+#define HARDWARE				0	; interface id
+
+:hardware_imports
+	dat 0 ; id					: uint
+	#define HARDWARE_ID			[hardware_imports+0]; the hardware id

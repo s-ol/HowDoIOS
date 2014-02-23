@@ -18,8 +18,11 @@
 	dat 0 ; blocksize			: uint
 	#define BLOCK_IO_BLOCKSIZE	[blockio_imports+2]	; size of a single block, in words
 	
+	dat 0 ; blocksize			: uint
+	#define BLOCK_IO_BLOCKS		[blockio_imports+2]	; number of existing blocks
+	
 	dat 0 ; load( id, *dest )	: (*void)( uint, *uint )
 	#define BLOCK_IO_LOAD		[blockio_imports+3]	; load block #id into buffer at dest
 	
-	dat 0 ; store( id, *dest )	: (*void)( uint, *uint )
-	#define BLOCK_IO_STORE		[blockio_imports+4]	; store buffer at dest in block #id
+	dat 0 ; store( *src, id )	: (*void)( uint, *uint )
+	#define BLOCK_IO_STORE		[blockio_imports+4]	; store buffer at src in block #id

@@ -1,0 +1,78 @@
+; m35fd_block_io.dasm: Mackapar M35FD BLOCK_IO Driver
+;
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
+;  Copyright (C) 2013 S0lll0s
+
+; BLOCK_IO - Block-based I/O (eg. for M35FD)
+
+#define BLOCK_IO					0
+
+:header_start
+	dat 0x4110						; magic number
+	dat 0x0100						; BI version 1.0
+	dat (code-header_start)			; header size
+	dat (end-code)					; code & data size
+	dat	1							; flags (singleton)
+	dat	0xffff						; entry point = none
+	; relocation table
+	dat 0
+	; exports table
+	dat 1			; 1 entry
+	dat BLOCK_IO	; ifd: BLOCK_IO
+	dat 5			; 5 export entries
+	dat (_init-code)	; init()
+	dat (_exit-code)	; exit()
+	dat 0x200			; blocksize
+	dat 0x5A0			; num blocks
+	dat (_load-code)	; load( id, dest )
+	dat (_store-code)	; store( src, id )
+	; imports table
+	dat 1			; 1 entry
+	dat HARDWARE	; ifd: HARDWARE
+:code
+:_init
+	SET A, 0				; interface id
+	SET B, hardware_imports	; destination
+	INT DEP_LOAD
+	IFN A, 0
+		SET [set_up], 1
+	SET PC, POP
+:_exit
+	SET [set_up], 0
+	SET PC, POP
+:_load
+	SET PUSH, X
+	SET PUSH, Y
+	SET A, 1
+	SET X, B
+	SET Y, C
+	HWI HARDWARE_ID
+	SET PC, wait_ready
+:_store
+	SET PUSH, X
+	SET PUSH, Y
+	SET A, 2
+	SET X, C
+	SET Y, B
+	HWI HARDWARE_ID
+	SET PC, wait_ready
+	
+:wait_ready
+	SET A, 1
+	SET PC, .f
+:.loop
+	INT PROC_SKIP
+:.f	HWI HARDWARE_ID
+	IFE B, 3
+		SET PC, .loop
+	SET Y, POP
+	SET X, POP
+	SET PC, POP
+
+:set_up dat 0
+
+#include '../interfaces/hardware.dasm'
+:end
+
+#include '../api.dasm'
