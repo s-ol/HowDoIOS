@@ -8,9 +8,13 @@
 ; sets memory between (including) A and B to C
 :_memset
 	SET A, PEEK ; leave A on the stack
+	JSR __memset
+	RFI 0
+
+:__memset
 :.loop
 	IFG A, B
-		RFI 0
+		SET PC, POP
 	SET [A], C
 	ADD A, 1
 	SET PC, .loop
@@ -19,9 +23,13 @@
 ; copies memory between (including) A and B to memory starting at C
 :_memcpy
 	SET A, PEEK
+	JSR __memcpy
+	RFI 0
+
+:__memcpy
 :.loop
 	IFG A, B
-		RFI 0
+		SET PC, POP
 	SET [A], [C]
 	ADD A, 1
 	ADD C, 1
@@ -30,27 +38,32 @@
 ; STRCMP (0xf032)
 ; compares two strings, returns 1 on success, B is the last character
 :_strcmp
-	SET A, POP
+	SET A, PEEK
+	JSR __strcmp
+	SET PEEK, A
+	RFI 0
+
+:__strcmp
 	SET C, 0
-:_strcmp_loop
+:.loop
 	IFE [A], 0
 		IFE [B], 0
-			SET PC, _strcmp_success
+			SET PC, .success
 	IFN [A], [B]
-		SET PC, _strcmp_wind
+		SET PC, .wind
 	ADD A, 1
 	ADD B, 1
 	ADD C, 1
-	SET PC, _strcmp_loop
-:_strcmp_wind
+	SET PC, .loop
+:.wind
 	IFE [B], 0
-		SET PC, _strcmp_failure
+		SET PC, .failure
 	ADD B, 1
 	ADD C, 1
-	SET PC, _strcmp_wind
-:_strcmp_failure
-	SET PUSH, 0
-	RFI 0
-:_strcmp_success
-	SET PUSH, 1
-	RFI 0
+	SET PC, .wind
+:.failure
+	SET A, 0
+	SET PC, POP
+:.success
+	SET A, 1
+	SET PC, POP

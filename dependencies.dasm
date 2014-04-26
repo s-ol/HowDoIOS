@@ -1,0 +1,12 @@
+; dependencies.dasm: process-dependency management
+;
+; This file is part of HowDoIOS.
+; Visit our git repo at https://github.com/S0lll0s/HowDoIOS
+;  Copyright (C) 2013 S0lll0s
+
+:_dependency_exports	dat 0 ; start of exports list
+
+; export info:
+; dat id, next
+; dat num_exporters
+; dat pid(0), pid(1),..., pid_(num_exporters-1)		; pid(0) is the current default

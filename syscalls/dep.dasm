@@ -8,4 +8,12 @@
 ; load exports of interface number A into import structure at B
 :_dep_load
 	SET A, PEEK
+	; TODO:
+	; if import == 0:
+		; give hardware id
+	; else if in _dependency_exports:
+		; get pid
+		; load exports
+	; else
+		; return 0
 	RFI 0

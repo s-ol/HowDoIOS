@@ -108,3 +108,4 @@
 #include 'syscalls/msg.dasm'
 #include 'syscalls/mem.dasm'
 #include 'tasking.dasm'
+#include 'dependencies.dasm'
