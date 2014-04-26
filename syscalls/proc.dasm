@@ -90,8 +90,25 @@
 	
 	SET A, PEEK		; restore destination
 	SET B, A
-	ADD B, 8		; skip to reloc table + 2
-	ADD B, [A+6]	; skip to exported interfaces
+	ADD B, 7		; skip to reloc table + 1
+	ADD A, [A+2]
+	SET PUSH, A		; save begin of code segment
+	SET C, [B-1]	; num entries
+	
+:.relocl
+	IFE C, 0
+		SET PC, .relocd
+	SET A, PEEK
+	SET X, A
+	ADD A, [B]
+	ADD [A], X
+	
+	SUB C, 1
+	ADD B, 1
+	SET PC, .relocl
+	
+:.relocd
+	ADD B, 2 ; skip over num_exports
 	
 	SET C, [B-1]
 	; TODO: for each export:
@@ -171,6 +188,8 @@
 	SET [A+0xd], 0
 	SET [A+0xe], C	  	; header
 	SET [A+0xf], 0  	; flags
+	IFE [C+f], 0xffff	; no entry = lock
+		SET [A+0xf], 1
 	
 	SET X, A ; backup the task info
 	
