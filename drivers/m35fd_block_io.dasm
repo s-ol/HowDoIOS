@@ -6,6 +6,8 @@
 
 ; BLOCK_IO - Block-based I/O (eg. for M35FD)
 
+.reserve 0x20 ; prevent short literals in our labels
+
 #define BLOCK_IO					2
 
 :header_start
@@ -16,30 +18,31 @@
 	dat	1							; flags (singleton)
 	dat	0xffff						; entry point = none
 	; relocation table
-	dat 0
+	dat 7
+		dat r1+1, r2+1, r3+1, r4+1, r5+1, r6+1, r7+1
 	; exports table
 	dat 1			; 1 entry
-	dat BLOCK_IO	; ifd: BLOCK_IO
-	dat 5			; 5 export entries
-	dat (_init-code)	; init()
-	dat (_exit-code)	; exit()
-	dat 0x200			; blocksize
-	dat 0x5A0			; num blocks
-	dat (_load-code)	; load( id, dest )
-	dat (_store-code)	; store( src, id )
+		dat BLOCK_IO	; ifd: BLOCK_IO
+		dat 5			; 5 export entries
+			dat (_init-code)	; init()
+			dat (_exit-code)	; exit()
+			dat 0x200			; blocksize
+			dat 0x5A0			; num blocks
+			dat (_load-code)	; load( id, dest )
+			dat (_store-code)	; store( src, id )
 	; imports table
 	dat 1			; 1 entry
-	dat HARDWARE	; ifd: HARDWARE
+		dat HARDWARE	; ifd: HARDWARE
 :code
 :_init
-	SET A, 0				; interface id
-	SET B, hardware_imports	; destination
+	SET A, 0
+:r1	SET B, hardware_imports-code	; destination
 	INT DEP_LOAD
 	IFN A, 0
-		SET [set_up], 1
+:r2		SET [set_up-code], 1
 	SET PC, POP
 :_exit
-	SET [set_up], 0
+:r3	SET [set_up-code], 0
 	SET PC, POP
 :_load
 	SET PUSH, X
@@ -48,7 +51,7 @@
 	SET X, B
 	SET Y, C
 	HWI HARDWARE_ID
-	SET PC, wait_ready
+:r4	SET PC, wait_ready-code
 :_store
 	SET PUSH, X
 	SET PUSH, Y
@@ -56,16 +59,17 @@
 	SET X, C
 	SET Y, B
 	HWI HARDWARE_ID
-	SET PC, wait_ready
+:r5	SET PC, wait_ready-code
 	
 :wait_ready
 	SET A, 1
-	SET PC, .f
-:.loop
+	dat "B"
+:r6	SET PC, f-code
+:loop
 	INT PROC_SKIP
-:.f	HWI HARDWARE_ID
+:f	HWI HARDWARE_ID
 	IFE B, 3
-		SET PC, .loop
+:r7	SET PC, loop-code
 	SET Y, POP
 	SET X, POP
 	SET PC, POP
