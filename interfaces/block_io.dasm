@@ -6,7 +6,7 @@
 
 ; BLOCK_IO - Block-based I/O (eg. for M35FD)
 
-#define BLOCK_IO				0	; interface id
+#define BLOCK_IO				2	; interface id
 
 :blockio_imports
 	dat 0 ; init()				: (*void)()

@@ -6,7 +6,7 @@
 
 ; BLOCK_IO - Block-based I/O (eg. for M35FD)
 
-#define BLOCK_IO					0
+#define BLOCK_IO					2
 
 :header_start
 	dat 0x4110						; magic number
