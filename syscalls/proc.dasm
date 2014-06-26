@@ -188,7 +188,7 @@
 	SET [A+0xd], 0
 	SET [A+0xe], C	  	; header
 	SET [A+0xf], 0  	; flags
-	IFE [C+f], 0xffff	; no entry = lock
+	IFE [C+0x5], 0xffff	; no entry = lock
 		SET [A+0xf], 1
 	
 	SET X, A ; backup the task info
