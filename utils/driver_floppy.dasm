@@ -12,14 +12,14 @@ dat first, second, third, fourth
 
 ; driver infos:
 ; 		dat code_size,							packed_name
-:first	dat (sector_one_end - sector_one),		0x6465, 0x6661, 0x756c, 0x7400 ; default
-:second	dat (sector_two_end - sector_two),		0x6261, 0x7369, 0x635f, 0x6b65, 0x7962, 0x6f61, 0x7264, 0 ; basic_keyboard
+:first	dat (sector_one_end - sector_one),		0x6465, 0x6661, 0x756c, 0x7400 ; default, DOESN'T WORK
+:second	dat (sector_two_end - sector_two),		0x6261, 0x7369, 0x635f, 0x6b65, 0x7962, 0x6f61, 0x7264, 0 ; basic_keyboard, DOESN'T WORK
 :third	dat (sector_three_end - sector_three),	0x4d33, 0x3546, 0x445f, 0x302e, 0x3100 ; M35FD_0.1
-:fourth	dat (sector_four_end - sector_four),	0x4c45, 0x4d31, 0x3830, 0x325f, 0x302e, 0x3100 ; LEM1802_0.1
+:fourth	dat (sector_four_end - sector_four),	0x4c45, 0x4d31, 0x3830, 0x325f, 0x302e, 0x3100 ; LEM1802_0.1, DOESN'T WORK
 	:sector_zero_end
-	.origin 0x200
-
-:sector_one ; default
+	
+.origin 0x200
+:sector_one ; default            DOESN'T WORK
 	dat .init
 	dat .exit
 	dat .interrupt
@@ -39,9 +39,9 @@ dat first, second, third, fourth
 
 :.id dat 0
 	:sector_one_end
-	.origin 0x400
-	
-:sector_two ; basic_keyboard
+
+.origin 0x400
+:sector_two ; basic_keyboard            DOESN'T WORK
 	dat .init
 	dat .exit
 	dat .interrupt
@@ -61,8 +61,8 @@ dat first, second, third, fourth
 
 :.id dat 0
 	:sector_two_end
-	.origin 0x600
-	
+
+.origin 0x600
 :sector_three ; M35FD_0.1
 	dat .init
 	dat .exit
@@ -83,8 +83,8 @@ dat first, second, third, fourth
 
 :.id dat 0
 	:sector_three_end
-	.origin 0x800
 	
+.origin 0x800
 :sector_four ; LEM1802_0.1
 	dat .init
 	dat .exit
